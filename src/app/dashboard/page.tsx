@@ -96,9 +96,9 @@ export default function DashboardPage() {
 
       {/* Live Map and Alerts */}
       <div className="col-span-1 lg:col-span-6">
-        <Card>
+        <Card className="bg-green-200">
           <CardHeader>
-            <CardTitle className="text-xl font-semibold">Live GPS Route Map</CardTitle>
+            <CardTitle className="text-xl font-semibold text-black">Live GPS Route Map</CardTitle>
           </CardHeader>
           <CardContent>
              {dashboardMap && (
