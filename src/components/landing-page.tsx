@@ -2,6 +2,8 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/icons';
 import Image from 'next/image';
+import { Network, MapPin, Radar } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 
 export function LandingPage() {
   return (
@@ -39,9 +41,6 @@ export function LandingPage() {
                   <Button asChild size="lg">
                     <Link href="/signup">Get Started</Link>
                   </Button>
-                  <Button asChild variant="outline" size="lg">
-                    <Link href="/dashboard">View Demo</Link>
-                  </Button>
                 </div>
               </div>
                <Image
@@ -55,6 +54,62 @@ export function LandingPage() {
             </div>
           </div>
         </section>
+
+        <section className="w-full bg-background py-12 md:py-24 lg:py-32">
+          <div className="container px-4 md:px-6">
+            <div className="mb-12 text-center">
+                <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl">Advanced Threat Detection Capabilities</h2>
+                <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+                    Our platform identifies and mitigates critical security risks for autonomous vehicles.
+                </p>
+            </div>
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+              <Card>
+                <CardHeader className="flex flex-row items-center gap-4">
+                  <Network className="h-10 w-10 text-primary" />
+                  <CardTitle>Sybil Attack Detection</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <p className="text-sm text-muted-foreground">
+                    A Sybil attack creates multiple fake vehicle identities to disrupt vehicle-to-vehicle communication networks, leading to phantom traffic jams or incorrect routing.
+                  </p>
+                   <p className="text-sm font-medium">
+                    ThreatWatch AV analyzes communication patterns to identify and neutralize these fake nodes in real-time, ensuring network integrity.
+                  </p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="flex flex-row items-center gap-4">
+                  <MapPin className="h-10 w-10 text-primary" />
+                  <CardTitle>GPS Spoofing Analysis</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                   <p className="text-sm text-muted-foreground">
+                    GPS spoofing transmits false satellite signals to trick an AV into thinking it's somewhere it isn't, potentially causing it to drive off-road or into danger.
+                  </p>
+                   <p className="text-sm font-medium">
+                    Our system cross-references GPS data with other sensors to detect anomalies and alert the system to a potential spoofing event, ensuring safe navigation.
+                  </p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="flex flex-row items-center gap-4">
+                  <Radar className="h-10 w-10 text-primary" />
+                  <CardTitle>Sensor Spoofing Detection</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <p className="text-sm text-muted-foreground">
+                    This attack involves feeding false data to an AV's sensors (like LIDAR or cameras) to make it perceive phantom obstacles or ignore real ones.
+                  </p>
+                  <p className="text-sm font-medium">
+                    ThreatWatch AV uses advanced algorithms to find inconsistencies across multiple sensor inputs, identifying and flagging manipulated data to prevent accidents.
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </section>
+
       </main>
       <footer className="flex items-center justify-center p-6">
         <p className="text-xs text-muted-foreground">
