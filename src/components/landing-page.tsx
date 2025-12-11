@@ -1,11 +1,33 @@
+'use client';
+
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/icons';
 import Image from 'next/image';
-import { Network, MapPin, Radar } from 'lucide-react';
+import { Network, MapPin, Radar, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
+import { useEffect, useState } from 'react';
+import { getHeroVideo } from '@/app/actions';
 
 export function LandingPage() {
+  const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    getHeroVideo()
+      .then((res) => {
+        if (res.videoUrl) {
+          setVideoUrl(res.videoUrl);
+        } else {
+          setError(res.error || 'Failed to load video.');
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        setError('An unexpected error occurred.');
+      });
+  }, []);
+
   return (
     <div className="flex min-h-screen flex-col">
       <header className="flex h-16 items-center justify-between px-4 lg:px-6">
@@ -43,14 +65,31 @@ export function LandingPage() {
                   </Button>
                 </div>
               </div>
-              <Image
-                src="https://images.unsplash.com/photo-1633334960394-dda2359d9a7c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxhdXRvbm9tb3VzJTIwZHJpdmluZ3xlbnwwfHx8fDE3NzE1NzU5MDh8MA&ixlib=rb-4.1.0&q=80&w=1080"
-                width="600"
-                height="400"
-                alt="Hero"
-                className="mx-auto aspect-video overflow-hidden rounded-xl object-cover sm:w-full lg:order-last"
-                data-ai-hint="autonomous driving"
-              />
+              <div className="mx-auto aspect-video overflow-hidden rounded-xl object-cover sm:w-full lg:order-last">
+                {videoUrl ? (
+                  <video
+                    src={videoUrl}
+                    width="600"
+                    height="400"
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center rounded-lg bg-muted">
+                    {error ? (
+                      <p className="text-sm text-destructive">{error}</p>
+                    ) : (
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Loader2 className="h-5 w-5 animate-spin" />
+                        <span>Generating video...</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </section>
@@ -58,10 +97,15 @@ export function LandingPage() {
         <section className="w-full bg-background py-12 md:py-24 lg:py-32">
           <div className="container px-4 md:px-6">
             <div className="mb-12 text-center">
-                <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl">Advanced Threat Detection Capabilities</h2>
-                <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-                    Our platform identifies and mitigates critical security risks for autonomous vehicles, ensuring safe and reliable operation. We provide deep analysis into network, navigation, and sensor-based threats.
-                </p>
+              <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl">
+                Advanced Threat Detection Capabilities
+              </h2>
+              <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+                Our platform identifies and mitigates critical security risks
+                for autonomous vehicles, ensuring safe and reliable operation.
+                We provide deep analysis into network, navigation, and
+                sensor-based threats.
+              </p>
             </div>
             <div className="mx-auto grid max-w-5xl items-start gap-8 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 lg:gap-12">
               <Card className="text-center">
@@ -73,10 +117,16 @@ export function LandingPage() {
                 </CardHeader>
                 <CardContent className="space-y-2">
                   <p className="text-sm text-muted-foreground">
-                    A Sybil attack creates multiple fake vehicle identities to disrupt vehicle-to-vehicle (V2V) communication networks. This can lead to phantom traffic jams, incorrect routing, and even coordinated system failures.
+                    A Sybil attack creates multiple fake vehicle identities to
+                    disrupt vehicle-to-vehicle (V2V) communication networks.
+                    This can lead to phantom traffic jams, incorrect routing,
+                    and even coordinated system failures.
                   </p>
-                   <p className="text-sm font-medium">
-                    ThreatWatch AV analyzes communication patterns and message frequencies to identify and neutralize these fake nodes in real-time, preserving network integrity and ensuring reliable V2V data exchange.
+                  <p className="text-sm font-medium">
+                    ThreatWatch AV analyzes communication patterns and message
+                    frequencies to identify and neutralize these fake nodes in
+                    real-time, preserving network integrity and ensuring
+                    reliable V2V data exchange.
                   </p>
                 </CardContent>
               </Card>
@@ -88,11 +138,18 @@ export function LandingPage() {
                   <CardTitle className="mt-4">GPS Spoofing Analysis</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2">
-                   <p className="text-sm text-muted-foreground">
-                    GPS spoofing transmits false satellite signals to trick an AV into thinking it's somewhere it isn't. This can cause the vehicle to drive off-road, into oncoming traffic, or into other dangerous situations.
+                  <p className="text-sm text-muted-foreground">
+                    GPS spoofing transmits false satellite signals to trick an
+                    AV into thinking it&apos;s somewhere it isn&apos;t. This
+                    can cause the vehicle to drive off-road, into oncoming
+                    traffic, or into other dangerous situations.
                   </p>
-                   <p className="text-sm font-medium">
-                    Our system cross-references GPS data with inertial measurement units (IMU), cellular positioning, and other sensors to detect signal anomalies and alert the system to a potential spoofing event, ensuring safe and accurate navigation.
+                  <p className="text-sm font-medium">
+                    Our system cross-references GPS data with inertial
+                    measurement units (IMU), cellular positioning, and other
+                    sensors to detect signal anomalies and alert the system to a
+                    potential spoofing event, ensuring safe and accurate
+                    navigation.
                   </p>
                 </CardContent>
               </Card>
@@ -101,14 +158,23 @@ export function LandingPage() {
                   <div className="rounded-full bg-primary/10 p-4 text-primary">
                     <Radar className="h-8 w-8" />
                   </div>
-                  <CardTitle className="mt-4">Sensor Spoofing Detection</CardTitle>
+                  <CardTitle className="mt-4">
+                    Sensor Spoofing Detection
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2">
                   <p className="text-sm text-muted-foreground">
-                    This sophisticated attack involves feeding false data to an AV's critical sensors (like LiDAR, cameras, or radar) to make it perceive phantom obstacles or, more dangerously, ignore real ones.
+                    This sophisticated attack involves feeding false data to an
+                    AV&apos;s critical sensors (like LiDAR, cameras, or radar)
+                    to make it perceive phantom obstacles or, more dangerously,
+                    ignore real ones.
                   </p>
                   <p className="text-sm font-medium">
-                    ThreatWatch AV uses advanced machine learning algorithms to find inconsistencies across multiple sensor inputs, identifying and flagging manipulated data to prevent catastrophic accidents and ensure the vehicle perceives its true environment.
+                    ThreatWatch AV uses advanced machine learning algorithms to
+                    find inconsistencies across multiple sensor inputs,
+                    identifying and flagging manipulated data to prevent
+                    catastrophic accidents and ensure the vehicle perceives its
+                    true environment.
                   </p>
                 </CardContent>
               </Card>
@@ -118,7 +184,7 @@ export function LandingPage() {
       </main>
       <footer className="flex items-center justify-center p-6">
         <p className="text-xs text-muted-foreground">
-            © {new Date().getFullYear()} ThreatWatch AV. All rights reserved.
+          © {new Date().getFullYear()} ThreatWatch AV. All rights reserved.
         </p>
       </footer>
     </div>

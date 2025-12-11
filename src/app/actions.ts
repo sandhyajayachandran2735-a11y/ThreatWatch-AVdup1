@@ -5,6 +5,7 @@ import {
   summarizeVehicleThreats,
   type SummarizeVehicleThreatsInput,
 } from '@/ai/flows/summarize-vehicle-threats';
+import { generateHeroVideo } from '@/ai/flows/generate-hero-video';
 import { z } from 'zod';
 
 const AISummarySchema = z.object({
@@ -29,5 +30,15 @@ export async function getAISummary(
   } catch (e) {
     console.error(e);
     return { error: 'Failed to generate summary.' };
+  }
+}
+
+export async function getHeroVideo(): Promise<{ videoUrl?: string; error?: string }> {
+  try {
+    const result = await generateHeroVideo();
+    return { videoUrl: result };
+  } catch (e) {
+    console.error(e);
+    return { error: 'Failed to generate video.' };
   }
 }
