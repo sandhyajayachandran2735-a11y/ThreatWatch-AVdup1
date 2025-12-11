@@ -97,11 +97,13 @@ service cloud.firestore {
      * after running a detection analysis.
      * @path /sybil_attacks/{sybilAttackId}
      * @allow (create) Any authenticated user can create a new Sybil attack log.
-     * @allow (read, update, delete) All other operations are denied to clients.
+     * @allow (read) Any authenticated user can read the analysis history.
+     * @deny (update, delete) All other operations are denied to clients.
      */
     match /sybil_attacks/{sybilAttackId} {
       allow create: if isSignedIn();
-      allow read, update, delete: if false;
+      allow read: if isSignedIn();
+      allow update, delete: if false;
     }
   }
 }
