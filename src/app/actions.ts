@@ -8,7 +8,6 @@ import {
     type SummarizeVehicleThreatsInput,
     SummarizeVehicleThreatsInputSchema,
 } from '@/ai/schemas/summarize-vehicle-threats-schemas'
-import { generateHeroVideo } from '@/ai/flows/generate-hero-video';
 import {
   detectSybilAttack,
 } from '@/ai/flows/detect-sybil-attack';
@@ -48,16 +47,6 @@ export async function getAISummary(
   } catch (e) {
     console.error(e);
     return { error: 'Failed to generate summary.' };
-  }
-}
-
-export async function getHeroVideo(): Promise<{ videoUrl?: string; error?: string }> {
-  try {
-    const result = await generateHeroVideo();
-    return { videoUrl: result };
-  } catch (e) {
-    console.error(e);
-    return { error: 'Failed to generate video.' };
   }
 }
 

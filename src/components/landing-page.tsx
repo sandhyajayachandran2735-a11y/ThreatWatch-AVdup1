@@ -6,27 +6,10 @@ import { Logo } from '@/components/icons';
 import Image from 'next/image';
 import { Network, MapPin, Radar, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
-import { useEffect, useState } from 'react';
-import { getHeroVideo } from '@/app/actions';
+import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 export function LandingPage() {
-  const [videoUrl, setVideoUrl] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    getHeroVideo()
-      .then((res) => {
-        if (res.videoUrl) {
-          setVideoUrl(res.videoUrl);
-        } else {
-          setError(res.error || 'Failed to load video.');
-        }
-      })
-      .catch((err) => {
-        console.error(err);
-        setError('An unexpected error occurred.');
-      });
-  }, []);
+  const heroImage = PlaceHolderImages.find(p => p.id === 'landing-hero');
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -66,27 +49,22 @@ export function LandingPage() {
                 </div>
               </div>
               <div className="mx-auto aspect-video overflow-hidden rounded-xl object-cover sm:w-full lg:order-last">
-                {videoUrl ? (
-                  <video
-                    src={videoUrl}
-                    width="600"
-                    height="400"
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
+                {heroImage ? (
+                  <Image
+                    src={heroImage.imageUrl}
+                    alt="Autonomous vehicle in a futuristic city"
+                    width={600}
+                    height={400}
                     className="h-full w-full object-cover"
+                    data-ai-hint={heroImage.imageHint}
+                    priority
                   />
                 ) : (
                   <div className="flex h-full w-full items-center justify-center rounded-lg bg-muted">
-                    {error ? (
-                      <p className="text-sm text-destructive">{error}</p>
-                    ) : (
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Loader2 className="h-5 w-5 animate-spin" />
-                        <span>Generating video...</span>
+                        <span>Loading image...</span>
                       </div>
-                    )}
                   </div>
                 )}
               </div>
