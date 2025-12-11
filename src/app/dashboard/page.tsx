@@ -1,3 +1,5 @@
+'use client';
+
 import {
   Card,
   CardContent,
@@ -17,7 +19,7 @@ import { GpsAnomaliesChart, SpoofingFrequencyChart } from './_components/charts'
 import { AlertTriangle, ShieldCheck, ShieldAlert } from 'lucide-react';
 import { AIThreatSummary } from './_components/ai-summary';
 import { LiveMap } from './_components/live-map';
-import { ChatbotSidebar } from './_components/chatbot-sidebar';
+import { FloatingChatbot } from './_components/floating-chatbot';
 
 const metrics = {
   sybilAlerts: 14,
@@ -46,100 +48,98 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="flex h-[calc(100vh-4rem)]">
-      <ChatbotSidebar threatContext={threatContext} />
-      <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
-        <div className="grid grid-cols-1 gap-6">
-          {/* Metrics Row */}
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Sybil Alerts Today</CardTitle>
-                <ShieldAlert className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{metrics.sybilAlerts}</div>
-                <p className="text-xs text-muted-foreground">+2 since last hour</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">GPS Spoofing Events</CardTitle>
-                <AlertTriangle className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{metrics.gpsSpoofing}</div>
-                <p className="text-xs text-muted-foreground">High confidence events</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Sensor Spoofing Flags</CardTitle>
-                <ShieldCheck className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{metrics.sensorFlags}</div>
-                <p className="text-xs text-muted-foreground">Anomalies detected</p>
-              </CardContent>
-            </Card>
-          </div>
-
-            {/* AI Summary */}
-          <AIThreatSummary
-            sybilAlertsToday={metrics.sybilAlerts}
-            gpsSpoofingEvents={metrics.gpsSpoofing}
-            sensorSpoofingFlags={metrics.sensorFlags}
-          />
-          
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-              {/* Charts Section */}
-              <GpsAnomaliesChart />
-              <SpoofingFrequencyChart />
-          </div>
-
-
-          {/* Live Map and Alerts */}
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-xl font-semibold">Live GPS Route Map</CardTitle>
-                </CardHeader>
-                <CardContent>
-                   <div className="relative aspect-video w-full overflow-hidden rounded-lg">
-                      <LiveMap />
-                   </div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-xl font-semibold">Alerts</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Alert</TableHead>
-                        <TableHead className="text-right">Severity</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {alerts.map((alert, index) => (
-                        <TableRow key={index}>
-                          <TableCell className="font-medium">{alert.message}</TableCell>
-                          <TableCell className="text-right">
-                            <Badge className={severityConfig[alert.severity as keyof typeof severityConfig].className}>
-                              {severityConfig[alert.severity as keyof typeof severityConfig].label}
-                            </Badge>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </CardContent>
-              </Card>
-            </div>
+    <div className="relative flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+      <div className="grid grid-cols-1 gap-6">
+        {/* Metrics Row */}
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Sybil Alerts Today</CardTitle>
+              <ShieldAlert className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{metrics.sybilAlerts}</div>
+              <p className="text-xs text-muted-foreground">+2 since last hour</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">GPS Spoofing Events</CardTitle>
+              <AlertTriangle className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{metrics.gpsSpoofing}</div>
+              <p className="text-xs text-muted-foreground">High confidence events</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Sensor Spoofing Flags</CardTitle>
+              <ShieldCheck className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{metrics.sensorFlags}</div>
+              <p className="text-xs text-muted-foreground">Anomalies detected</p>
+            </CardContent>
+          </Card>
         </div>
+
+          {/* AI Summary */}
+        <AIThreatSummary
+          sybilAlertsToday={metrics.sybilAlerts}
+          gpsSpoofingEvents={metrics.gpsSpoofing}
+          sensorSpoofingFlags={metrics.sensorFlags}
+        />
+        
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            {/* Charts Section */}
+            <GpsAnomaliesChart />
+            <SpoofingFrequencyChart />
+        </div>
+
+
+        {/* Live Map and Alerts */}
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-xl font-semibold">Live GPS Route Map</CardTitle>
+              </CardHeader>
+              <CardContent>
+                 <div className="relative aspect-video w-full overflow-hidden rounded-lg">
+                    <LiveMap />
+                 </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-xl font-semibold">Alerts</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Alert</TableHead>
+                      <TableHead className="text-right">Severity</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {alerts.map((alert, index) => (
+                      <TableRow key={index}>
+                        <TableCell className="font-medium">{alert.message}</TableCell>
+                        <TableCell className="text-right">
+                          <Badge className={severityConfig[alert.severity as keyof typeof severityConfig].className}>
+                            {severityConfig[alert.severity as keyof typeof severityConfig].label}
+                          </Badge>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </div>
       </div>
+      <FloatingChatbot threatContext={threatContext} />
     </div>
   );
 }
