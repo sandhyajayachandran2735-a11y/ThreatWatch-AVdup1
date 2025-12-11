@@ -9,6 +9,7 @@ import {
   Network,
   Radar,
   Rocket,
+  History,
 } from 'lucide-react';
 import {
   SidebarMenu,
@@ -24,6 +25,7 @@ const navItems = [
   { href: '/dashboard/sensor-spoofing', icon: Radar, label: 'Sensor Spoofing' },
   { href: '/dashboard/missions', icon: Rocket, label: 'Missions' },
   { href: '/dashboard/logs', icon: FileText, label: 'System Logs' },
+  { href: '/dashboard/history', icon: History, label: 'History' },
 ];
 
 export function DashboardNav() {
