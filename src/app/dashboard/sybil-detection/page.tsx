@@ -29,7 +29,7 @@ import {
 // Sample data for easy testing
 const sampleData = {
   a: { position_x: 156.0186, position_y: 869.6497, speed: 14.29872, direction: 66.80889, acceleration: -0.10746, signal_strength: -92.9876, trust_score: 0.282821, sybil_attack_attempts: 2},
-  b: { position_x: 181.825, position_y: 211.7459, speed: 15.09628, direction: 312.24444, acceleration: -0.94809, signal_strength: -53.4068, trust_score: 0.076902, sybil_attack_attempts: 0},
+  b: { position_x: 181.825, position_y: 211.7459, speed: 15.09628, direction: 312.24444, acceleration: -0.94809, signal_strength: -53.4068, trust_score: 0.95, sybil_attack_attempts: 0},
   c: { position_x: 374.5401, position_y: 393.6355, speed: 11.20922, direction: 179.8813, acceleration: 1.37999, signal_strength: -74.8686, trust_score: 0.733277, sybil_attack_attempts: 1},
 };
 
