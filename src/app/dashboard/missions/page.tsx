@@ -22,6 +22,17 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -31,7 +42,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { PlusCircle } from 'lucide-react';
+import { PlusCircle, Trash2 } from 'lucide-react';
 
 const initialMissions = [
   { id: 1, title: 'Alpha-7 Urban Route', status: 'In Progress', statusVariant: 'default' },
@@ -63,7 +74,7 @@ export default function MissionsPage() {
     if (!newMissionTitle) return;
 
     const newMission = {
-      id: missions.length + 1,
+      id: missions.length > 0 ? Math.max(...missions.map(m => m.id)) + 1 : 1,
       title: newMissionTitle,
       status: newMissionStatus,
       statusVariant: statusOptions[newMissionStatus],
@@ -73,6 +84,10 @@ export default function MissionsPage() {
     setNewMissionTitle('');
     setNewMissionStatus('Planned');
     setDialogOpen(false);
+  };
+  
+  const handleDeleteMission = (missionId: number) => {
+    setMissions(missions.filter(mission => mission.id !== missionId));
   };
 
 
@@ -137,8 +152,30 @@ export default function MissionsPage() {
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {missions.map((mission) => (
           <Card key={mission.id}>
-            <CardHeader>
-              <CardTitle className="text-lg font-semibold">{mission.title}</CardTitle>
+            <CardHeader className="flex flex-row items-start justify-between">
+                <CardTitle className="text-lg font-semibold">{mission.title}</CardTitle>
+                 <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive">
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This action cannot be undone. This will permanently delete the mission
+                        <span className="font-semibold"> {mission.title}</span>.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction onClick={() => handleDeleteMission(mission.id)}>
+                        Delete
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
             </CardHeader>
             <CardContent>
               {mapThumbnail && (
