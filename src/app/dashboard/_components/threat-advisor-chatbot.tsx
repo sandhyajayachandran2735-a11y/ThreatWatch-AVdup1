@@ -66,17 +66,8 @@ export function ThreatAdvisorChatbot({ threatContext }: ThreatAdvisorChatbotProp
   };
 
   return (
-    <Card className="flex h-full flex-col">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-xl font-semibold">
-          <Bot />
-          Threat Advisor
-        </CardTitle>
-        <CardDescription>
-          Ask questions about the current threats and get AI-powered advice.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="flex-1 overflow-hidden">
+    <div className="flex h-full flex-col overflow-hidden">
+      <CardContent className="flex-1 overflow-hidden p-6">
         <ScrollArea className="h-full pr-4">
           <div className="space-y-4">
             {messages.length === 0 && (
@@ -142,6 +133,6 @@ export function ThreatAdvisorChatbot({ threatContext }: ThreatAdvisorChatbotProp
           </Button>
         </form>
       </CardFooter>
-    </Card>
+    </div>
   );
 }
