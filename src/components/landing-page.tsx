@@ -43,12 +43,12 @@ export function LandingPage() {
                   </Button>
                 </div>
               </div>
-               <Image
+              <Image
                 src="https://images.unsplash.com/photo-1633334960394-dda2359d9a7c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxhdXRvbm9tb3VzJTIwZHJpdmluZ3xlbnwwfHx8fDE3NzE1NzU5MDh8MA&ixlib=rb-4.1.0&q=80&w=1080"
                 width="600"
                 height="400"
                 alt="Hero"
-                className="mx-auto aspect-video overflow-hidden rounded-xl object-cover sm:w-full lg:order-last lg:aspect-square"
+                className="mx-auto aspect-video overflow-hidden rounded-xl object-cover sm:w-full lg:order-last"
                 data-ai-hint="autonomous driving"
               />
             </div>
