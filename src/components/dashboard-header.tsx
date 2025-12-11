@@ -79,6 +79,9 @@ export function DashboardHeader() {
             )}
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
+          <DropdownMenuItem asChild>
+            <Link href="/signup">Create another account</Link>
+          </DropdownMenuItem>
           <DropdownMenuItem onClick={handleLogout}>
             Log out
           </DropdownMenuItem>
