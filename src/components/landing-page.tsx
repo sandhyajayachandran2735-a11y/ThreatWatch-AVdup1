@@ -23,8 +23,27 @@ export function LandingPage() {
         </nav>
       </header>
       <main className="flex-1">
-        <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48">
-          <div className="container px-4 md:px-6">
+        <section className="relative w-full py-12 md:py-24 lg:py-32 xl:py-48">
+          <div className="absolute inset-0 z-0">
+            <Image
+              src="https://picsum.photos/seed/1/1200/800"
+              alt="Blurred background image 1"
+              layout="fill"
+              objectFit="cover"
+              className="opacity-10 blur-2xl"
+              data-ai-hint="abstract technology"
+            />
+             <Image
+              src="https://picsum.photos/seed/2/1200/800"
+              alt="Blurred background image 2"
+              layout="fill"
+              objectFit="cover"
+              className="opacity-10 blur-2xl"
+              style={{ mixBlendMode: 'overlay' }}
+               data-ai-hint="abstract lines"
+            />
+          </div>
+          <div className="container relative z-10 px-4 md:px-6">
             <div className="grid gap-6 lg:grid-cols-[1fr_400px] lg:gap-12 xl:grid-cols-[1fr_600px]">
               <div className="flex flex-col justify-center space-y-4">
                 <div className="space-y-2">
