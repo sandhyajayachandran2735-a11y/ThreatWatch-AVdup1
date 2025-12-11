@@ -67,11 +67,19 @@ export default function SignUpPage() {
       router.push('/dashboard');
     } catch (error: any) {
       console.error('Sign up error:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Sign Up Failed',
-        description: error.message || 'An unexpected error occurred.',
-      });
+      if (error.code === 'auth/email-already-in-use') {
+        toast({
+          variant: 'destructive',
+          title: 'Sign Up Failed',
+          description: 'This email is already registered. Please sign in.',
+        });
+      } else {
+        toast({
+          variant: 'destructive',
+          title: 'Sign Up Failed',
+          description: error.message || 'An unexpected error occurred.',
+        });
+      }
     }
   };
 
