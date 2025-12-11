@@ -10,6 +10,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  CardFooter,
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -41,6 +42,8 @@ export default function SybilDetectionPage() {
   const [prediction, setPrediction] = useState<DetectSybilAttackOutput | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
+  const [csvData, setCsvData] = useState<DetectSybilAttackInput | null>(null);
+
 
   const { control, handleSubmit, reset, setValue } = useForm<DetectSybilAttackInput>({
     resolver: zodResolver(DetectSybilAttackInputSchema),
@@ -79,6 +82,8 @@ export default function SybilDetectionPage() {
     reset(sampleData[sample]);
     setPrediction(null);
     setError(null);
+    setCsvData(null);
+    setFileName(null);
   };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -87,27 +92,37 @@ export default function SybilDetectionPage() {
       return;
     }
     setFileName(file.name);
+    setCsvData(null);
+    setPrediction(null);
+    setError(null);
+
 
     const reader = new FileReader();
     reader.onload = (e) => {
-      const text = e.target?.result as string;
-      const lines = text.split('\n');
-      const headers = lines[0].split(',').map(h => h.trim());
-      const data = lines[1].split(',').map(d => parseFloat(d.trim()));
+      try {
+        const text = e.target?.result as string;
+        const lines = text.split('\n');
+        const headers = lines[0].split(',').map(h => h.trim());
+        const data = lines[1].split(',').map(d => parseFloat(d.trim()));
 
-      const dataObject: { [key: string]: number } = {};
-      headers.forEach((header, index) => {
-        if (Object.keys(sampleData.a).includes(header)) {
-          dataObject[header] = data[index];
-        }
-      });
+        const dataObject: { [key: string]: number } = {};
+        headers.forEach((header, index) => {
+          if (Object.keys(sampleData.a).includes(header)) {
+            dataObject[header] = data[index];
+          }
+        });
       
-      const parsedData = DetectSybilAttackInputSchema.safeParse(dataObject);
-      if (parsedData.success) {
-        handleRunDetection(parsedData.data);
-      } else {
-        setError("CSV file format is incorrect or doesn't contain required columns.");
-        console.error(parsedData.error);
+        const parsedData = DetectSybilAttackInputSchema.safeParse(dataObject);
+        if (parsedData.success) {
+          reset(parsedData.data);
+          setCsvData(parsedData.data);
+        } else {
+            setError("CSV file format is incorrect or doesn't contain required columns.");
+            console.error(parsedData.error);
+        }
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "Failed to parse CSV file.");
+        console.error(e);
       }
     };
     reader.readAsText(file);
@@ -124,7 +139,7 @@ export default function SybilDetectionPage() {
               Submit a CSV file for Sybil attack analysis. The first data row will be used.
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent>
             <div className="flex h-40 w-full flex-col items-center justify-center rounded-lg border-2 border-dashed">
               <UploadCloud className="mb-4 h-10 w-10 text-muted-foreground" />
               <Label htmlFor="file-upload" className="cursor-pointer text-primary hover:underline">
@@ -134,6 +149,16 @@ export default function SybilDetectionPage() {
               <Input id="file-upload" type="file" className="sr-only" onChange={handleFileChange} accept=".csv" />
             </div>
           </CardContent>
+          <CardFooter>
+             <Button 
+                onClick={() => csvData && handleRunDetection(csvData)} 
+                disabled={!csvData || isLoading}
+                className="w-full"
+              >
+                  {isLoading && csvData ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                  Run CSV Analysis
+              </Button>
+          </CardFooter>
         </Card>
         <Card>
           <CardHeader>
@@ -163,7 +188,7 @@ export default function SybilDetectionPage() {
               ))}
               <div className="col-span-2">
                   <Button type="submit" className="w-full" disabled={isLoading}>
-                      {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                      {isLoading && !csvData ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                       Run Manual Detection
                   </Button>
               </div>

@@ -10,6 +10,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  CardFooter,
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -34,6 +35,7 @@ export default function GpsSpoofingPage() {
   const [prediction, setPrediction] = useState<DetectGpsSpoofingOutput | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
+  const [csvData, setCsvData] = useState<DetectGpsSpoofingInput | null>(null);
 
   const { control, handleSubmit, reset } = useForm<DetectGpsSpoofingInput>({
     resolver: zodResolver(DetectGpsSpoofingInputSchema),
@@ -59,6 +61,8 @@ export default function GpsSpoofingPage() {
     reset(sampleData[sample]);
     setPrediction(null);
     setError(null);
+    setCsvData(null);
+    setFileName(null);
   };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -67,11 +71,15 @@ export default function GpsSpoofingPage() {
       return;
     }
     setFileName(file.name);
+    setCsvData(null);
+    setPrediction(null);
+    setError(null);
+
 
     const reader = new FileReader();
     reader.onload = (e) => {
-      const text = e.target?.result as string;
       try {
+        const text = e.target?.result as string;
         const lines = text.split('\n');
         const headers = lines[0].split(',').map(h => h.trim());
         const data = lines[1].split(',').map(d => parseFloat(d.trim()));
@@ -86,7 +94,7 @@ export default function GpsSpoofingPage() {
         const parsedData = DetectGpsSpoofingInputSchema.safeParse(dataObject);
         if (parsedData.success) {
           reset(parsedData.data);
-          handleRunDetection(parsedData.data);
+          setCsvData(parsedData.data);
         } else {
           throw new Error("CSV file format is incorrect or doesn't contain required columns.");
         }
@@ -108,7 +116,7 @@ export default function GpsSpoofingPage() {
               Submit a CSV with GPS signal data. The first data row will be used.
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent>
             <div className="flex h-40 w-full flex-col items-center justify-center rounded-lg border-2 border-dashed">
               <UploadCloud className="mb-4 h-10 w-10 text-muted-foreground" />
               <Label htmlFor="file-upload" className="cursor-pointer text-primary hover:underline">
@@ -118,6 +126,16 @@ export default function GpsSpoofingPage() {
               <Input id="file-upload" type="file" className="sr-only" onChange={handleFileChange} accept=".csv" />
             </div>
           </CardContent>
+          <CardFooter>
+            <Button
+              onClick={() => csvData && handleRunDetection(csvData)}
+              disabled={!csvData || isLoading}
+              className="w-full"
+            >
+              {isLoading && csvData ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+              Run CSV Analysis
+            </Button>
+          </CardFooter>
         </Card>
         <Card>
           <CardHeader>
@@ -147,7 +165,7 @@ export default function GpsSpoofingPage() {
               ))}
               <div className="col-span-1">
                   <Button type="submit" className="w-full" disabled={isLoading}>
-                      {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                      {isLoading && !csvData ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                       Run Manual Detection
                   </Button>
               </div>
