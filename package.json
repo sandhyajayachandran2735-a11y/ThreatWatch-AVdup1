@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "concurrently \"npm:dev:next\" \"npm:dev:backend\"",
-    "dev:next": "next dev --turbopack -p 9003",
-    "dev:backend": "cd backend && uvicorn app:app --reload --port 8000",
+    "dev:next": "next dev --turbopack -p 9004",
+    "dev:backend": "cd backend && python -m uvicorn app:app --reload --port 8000",
     "genkit:dev": "genkit start -- tsx src/ai/dev.ts",
     "genkit:watch": "genkit start -- tsx --watch src/ai/dev.ts",
     "build": "NODE_ENV=production next build",
