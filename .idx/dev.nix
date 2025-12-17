@@ -1,5 +1,6 @@
 # To learn more about how to use Nix to configure your environment
 # see: https://firebase.google.com/docs/studio/customize-workspace
+
 {pkgs}: {
   # Which nixpkgs channel to use.
   channel = "stable-24.11"; # or "unstable"
@@ -7,6 +8,10 @@
   packages = [
     pkgs.nodejs_20
     pkgs.zulu
+    pkgs.python311
+    pkgs.python311Packages.fastapi 
+    pkgs.python311Packages.uvicorn 
+    pkgs.python311Packages.numpy
   ];
   # Sets environment variables in the workspace
   env = {};
