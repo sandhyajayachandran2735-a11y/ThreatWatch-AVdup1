@@ -15,7 +15,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { GpsAnomaliesChart, SpoofingFrequencyChart } from './_components/charts';
+// import { GpsAnomaliesChart, SpoofingFrequencyChart } from './_components/charts';
 import { AlertTriangle, ShieldCheck, ShieldAlert } from 'lucide-react';
 import { AIThreatSummary } from './_components/ai-summary';
 import { LiveMap } from './_components/live-map';
@@ -23,22 +23,23 @@ import { FloatingChatbot } from './_components/floating-chatbot';
 
 const metrics = {
   sybilAlerts: 14,
-  gpsSpoofing: 3,
-  sensorFlags: 8,
-};
+  gpsSpoofing:2,
+  sensorFlags:3
 
-const alerts = [
-  { message: 'Potential GPS spoofing detected near downtown area.', severity: 'danger' },
-  { message: 'Unusual CAN bus traffic from node 0x1F3.', severity: 'warning' },
-  { message: 'LIDAR sensor data mismatch on vehicle #A48B.', severity: 'warning' },
-  { message: 'All systems nominal.', severity: 'safe' },
-];
+ };
 
-const severityConfig = {
-  danger: { label: 'Danger', className: 'bg-destructive text-destructive-foreground hover:bg-destructive/80' },
-  warning: { label: 'Warning', className: 'bg-warning text-warning-foreground hover:bg-warning/80' },
-  safe: { label: 'Safe', className: 'bg-success text-success-foreground hover:bg-success/80' },
-};
+// const alerts = [
+//   { message: 'Potential GPS spoofing detected near downtown area.', severity: 'danger' },
+//   { message: 'Unusual CAN bus traffic from node 0x1F3.', severity: 'warning' },
+//   { message: 'LIDAR sensor data mismatch on vehicle #A48B.', severity: 'warning' },
+//   { message: 'All systems nominal.', severity: 'safe' },
+// ];
+
+// const severityConfig = {
+//   danger: { label: 'Danger', className: 'bg-destructive text-destructive-foreground hover:bg-destructive/80' },
+//   warning: { label: 'Warning', className: 'bg-warning text-warning-foreground hover:bg-warning/80' },
+//   safe: { label: 'Safe', className: 'bg-success text-success-foreground hover:bg-success/80' },
+// };
 
 export default function DashboardPage() {
   const threatContext = {
@@ -67,8 +68,8 @@ export default function DashboardPage() {
               <AlertTriangle className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{metrics.gpsSpoofing}</div>
-              <p className="text-xs text-muted-foreground">High confidence events</p>
+              {/* <div className="text-2xl font-bold">{metrics.gpsSpoofing}</div> */}
+              <p className="text-xs text-muted-foreground">Releasing soon....</p>
             </CardContent>
           </Card>
           <Card>
@@ -77,8 +78,8 @@ export default function DashboardPage() {
               <ShieldCheck className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{metrics.sensorFlags}</div>
-              <p className="text-xs text-muted-foreground">Anomalies detected</p>
+              {/* <div className="text-2xl font-bold">{metrics.sensorFlags}</div> */}
+              <p className="text-xs text-muted-foreground">Releasing soon...</p>
             </CardContent>
           </Card>
         </div>
@@ -90,11 +91,7 @@ export default function DashboardPage() {
           sensorSpoofingFlags={metrics.sensorFlags}
         />
         
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-            {/* Charts Section */}
-            <GpsAnomaliesChart />
-            <SpoofingFrequencyChart />
-        </div>
+        
 
 
         {/* Live Map and Alerts */}
@@ -109,19 +106,19 @@ export default function DashboardPage() {
                  </div>
               </CardContent>
             </Card>
-            <Card>
-              <CardHeader>
+            {/* <Card> */}
+              {/* <CardHeader>
                 <CardTitle className="text-xl font-semibold">Alerts</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
+              </CardHeader> */}
+              {/* <CardContent> */}
+                {/* <Table> */}
+                  {/* <TableHeader>
                     <TableRow>
                       <TableHead>Alert</TableHead>
                       <TableHead className="text-right">Severity</TableHead>
                     </TableRow>
-                  </TableHeader>
-                  <TableBody>
+                  </TableHeader> */}
+                  {/* <TableBody>
                     {alerts.map((alert, index) => (
                       <TableRow key={index}>
                         <TableCell className="font-medium">{alert.message}</TableCell>
@@ -132,10 +129,10 @@ export default function DashboardPage() {
                         </TableCell>
                       </TableRow>
                     ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
+                  </TableBody> */}
+                {/* </Table> */}
+              {/* </CardContent> */}
+            {/* </Card> */}
           </div>
       <FloatingChatbot threatContext={threatContext} />
     </div>

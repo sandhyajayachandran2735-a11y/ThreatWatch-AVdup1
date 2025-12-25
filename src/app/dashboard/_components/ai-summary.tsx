@@ -22,7 +22,7 @@ interface AIThreatSummaryProps {
 export function AIThreatSummary({
   sybilAlertsToday,
   gpsSpoofingEvents,
-  sensorSpoofingFlags,
+  sensorSpoofingFlags
 }: AIThreatSummaryProps) {
   const [summary, setSummary] = useState('');
   const [error, setError] = useState('');
@@ -35,8 +35,8 @@ export function AIThreatSummary({
     const result = await getAISummary({
       sybilAlertsToday,
       gpsSpoofingEvents,
-      sensorSpoofingFlags,
-    });
+      sensorSpoofingFlags
+     });
     setIsLoading(false);
 
     if (result.error) {

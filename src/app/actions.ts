@@ -24,28 +24,28 @@ import {
   AskThreatAdvisorInputSchema,
 } from '@/ai/schemas/threat-advisor-schemas';
 import { z } from 'zod';
-import {
-  detectGpsSpoofing,
-} from '@/ai/flows/detect-gps-spoofing';
-import {
-  type DetectGpsSpoofingInput,
-  type DetectGpsSpoofingOutput,
-  DetectGpsSpoofingInputSchema,
-} from '@/ai/schemas/detect-gps-spoofing-schemas';
-import {
-  detectSensorAnomaly,
-} from '@/ai/flows/detect-sensor-anomaly';
-import {
-  type DetectSensorAnomalyInput,
-  type DetectSensorAnomalyOutput,
-  DetectSensorAnomalyInputSchema,
-} from '@/ai/schemas/detect-sensor-anomaly-schemas';
+// import {
+//   detectGpsSpoofing,
+// } from '@/ai/flows/detect-gps-spoofing';
+// import {
+//   type DetectGpsSpoofingInput,
+//   type DetectGpsSpoofingOutput,
+//   DetectGpsSpoofingInputSchema,
+// } from '@/ai/schemas/detect-gps-spoofing-schemas';
+// import {
+//   detectSensorAnomaly,
+// } from '@/ai/flows/detect-sensor-anomaly';
+// import {
+//   type DetectSensorAnomalyInput,
+//   type DetectSensorAnomalyOutput,
+//   DetectSensorAnomalyInputSchema,
+// } from '@/ai/schemas/detect-sensor-anomaly-schemas';
 
 
 const AISummarySchema = z.object({
   sybilAlertsToday: z.coerce.number(),
-  gpsSpoofingEvents: z.coerce.number(),
-  sensorSpoofingFlags: z.coerce.number(),
+  // gpsSpoofingEvents: z.coerce.number(),
+  // sensorSpoofingFlags: z.coerce.number(),
   additionalContext: z.string().optional(),
 });
 
@@ -86,43 +86,43 @@ export async function getSybilAttackPrediction(
   }
 }
 
-export async function getGpsSpoofingPrediction(
-  input: DetectGpsSpoofingInput
-): Promise<{ result?: DetectGpsSpoofingOutput; error?: string }> {
-  const parsed = DetectGpsSpoofingInputSchema.safeParse(input);
+// export async function getGpsSpoofingPrediction(
+//   input: DetectGpsSpoofingInput
+// ): Promise<{ result?: DetectGpsSpoofingOutput; error?: string }> {
+//   const parsed = DetectGpsSpoofingInputSchema.safeParse(input);
 
-  if (!parsed.success) {
-    console.error(parsed.error);
-    return { error: 'Invalid input.' };
-  }
+  // if (!parsed.success) {
+  //   console.error(parsed.error);
+  //   return { error: 'Invalid input.' };
+  // }
 
-  try {
-    const result = await detectGpsSpoofing(parsed.data);
-    return { result };
-  } catch (e) {
-    console.error(e);
-    return { error: 'Failed to get prediction.' };
-  }
-}
+  // try {
+  //   const result = await detectGpsSpoofing(parsed.data);
+  //   return { result };
+  // } catch (e) {
+  //   console.error(e);
+  //   return { error: 'Failed to get prediction.' };
+  // }
+// }
 
-export async function getSensorAnomalyPrediction(
-  input: DetectSensorAnomalyInput
-): Promise<{ result?: DetectSensorAnomalyOutput; error?: string }> {
-  const parsed = DetectSensorAnomalyInputSchema.safeParse(input);
+// export async function getSensorAnomalyPrediction(
+//   input: DetectSensorAnomalyInput
+// ): Promise<{ result?: DetectSensorAnomalyOutput; error?: string }> {
+//   const parsed = DetectSensorAnomalyInputSchema.safeParse(input);
 
-  if (!parsed.success) {
-    console.error(parsed.error);
-    return { error: 'Invalid input.' };
-  }
+//   if (!parsed.success) {
+//     console.error(parsed.error);
+//     return { error: 'Invalid input.' };
+//   }
 
-  try {
-    const result = await detectSensorAnomaly(parsed.data);
-    return { result };
-  } catch (e) {
-    console.error(e);
-    return { error: 'Failed to get prediction.' };
-  }
-}
+//   try {
+//     const result = await detectSensorAnomaly(parsed.data);
+//     return { result };
+//   } catch (e) {
+//     console.error(e);
+//     return { error: 'Failed to get prediction.' };
+//   }
+// }
 
 
 export async function getThreatAdvice(
