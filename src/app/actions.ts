@@ -1,4 +1,3 @@
-// @/app/actions.ts
 'use server';
 
 import {
@@ -6,7 +5,6 @@ import {
 } from '@/ai/flows/summarize-vehicle-threats';
 import {
     type SummarizeVehicleThreatsInput,
-    SummarizeVehicleThreatsInputSchema,
 } from '@/ai/schemas/summarize-vehicle-threats-schemas'
 import {
   detectSybilAttack,
@@ -44,8 +42,6 @@ import { z } from 'zod';
 
 const AISummarySchema = z.object({
   sybilAlertsToday: z.coerce.number(),
-  // gpsSpoofingEvents: z.coerce.number(),
-  // sensorSpoofingFlags: z.coerce.number(),
   additionalContext: z.string().optional(),
 });
 

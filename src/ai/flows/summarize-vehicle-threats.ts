@@ -28,8 +28,6 @@ const prompt = ai.definePrompt({
   Based on the following threat intelligence signals, provide a prioritized summary of the most critical threats to vehicle safety. Highlight the most pressing issues that require immediate attention.
 
   Sybil Alerts Today: {{sybilAlertsToday}}
-  GPS Spoofing Events: {{gpsSpoofingEvents}}
-  Sensor Spoofing Flags: {{sensorSpoofingFlags}}
 
   {{#if additionalContext}}
   Additional Context: {{additionalContext}}

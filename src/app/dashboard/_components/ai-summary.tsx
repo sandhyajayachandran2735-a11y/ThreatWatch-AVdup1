@@ -15,14 +15,10 @@ import { Loader2, Sparkles } from 'lucide-react';
 
 interface AIThreatSummaryProps {
   sybilAlertsToday: number;
-  gpsSpoofingEvents: number;
-  sensorSpoofingFlags: number;
 }
 
 export function AIThreatSummary({
   sybilAlertsToday,
-  gpsSpoofingEvents,
-  sensorSpoofingFlags
 }: AIThreatSummaryProps) {
   const [summary, setSummary] = useState('');
   const [error, setError] = useState('');
@@ -34,8 +30,6 @@ export function AIThreatSummary({
     setSummary('');
     const result = await getAISummary({
       sybilAlertsToday,
-      gpsSpoofingEvents,
-      sensorSpoofingFlags
      });
     setIsLoading(false);
 
@@ -79,7 +73,7 @@ export function AIThreatSummary({
           )}
           Generate Summary
         </Button>
-      </CardFooter>
+      </Footer>
     </Card>
   );
 }

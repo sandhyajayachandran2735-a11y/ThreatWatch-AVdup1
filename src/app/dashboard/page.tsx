@@ -28,18 +28,20 @@ const metrics = {
 
  };
 
-// const alerts = [
-//   { message: 'Potential GPS spoofing detected near downtown area.', severity: 'danger' },
-//   { message: 'Unusual CAN bus traffic from node 0x1F3.', severity: 'warning' },
-//   { message: 'LIDAR sensor data mismatch on vehicle #A48B.', severity: 'warning' },
-//   { message: 'All systems nominal.', severity: 'safe' },
-// ];
+const alerts = [
+  { message: 'Sybil node 0xAB1 detected with 95% confidence.', severity: 'danger' },
+  { message: 'Potential GPS spoofing detected near downtown area.', severity: 'warning' },
+  { message: 'Unusual CAN bus traffic from node 0x1F3.', severity: 'warning' },
+  { message: 'Sybil node 0xCD2 detected with 88% confidence.', severity: 'danger' },
+  { message: 'LIDAR sensor data mismatch on vehicle #A48B.', severity: 'warning' },
+  { message: 'All systems nominal.', severity: 'safe' },
+];
 
-// const severityConfig = {
-//   danger: { label: 'Danger', className: 'bg-destructive text-destructive-foreground hover:bg-destructive/80' },
-//   warning: { label: 'Warning', className: 'bg-warning text-warning-foreground hover:bg-warning/80' },
-//   safe: { label: 'Safe', className: 'bg-success text-success-foreground hover:bg-success/80' },
-// };
+const severityConfig = {
+  danger: { label: 'Danger', className: 'bg-destructive text-destructive-foreground hover:bg-destructive/80' },
+  warning: { label: 'Warning', className: 'bg-warning text-warning-foreground hover:bg-warning/80' },
+  safe: { label: 'Safe', className: 'bg-success text-success-foreground hover:bg-success/80' },
+};
 
 export default function DashboardPage() {
   const threatContext = {
@@ -87,8 +89,6 @@ export default function DashboardPage() {
           {/* AI Summary */}
         <AIThreatSummary
           sybilAlertsToday={metrics.sybilAlerts}
-          gpsSpoofingEvents={metrics.gpsSpoofing}
-          sensorSpoofingFlags={metrics.sensorFlags}
         />
         
         
@@ -106,19 +106,19 @@ export default function DashboardPage() {
                  </div>
               </CardContent>
             </Card>
-            {/* <Card> */}
-              {/* <CardHeader>
-                <CardTitle className="text-xl font-semibold">Alerts</CardTitle>
-              </CardHeader> */}
-              {/* <CardContent> */}
-                {/* <Table> */}
-                  {/* <TableHeader>
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-xl font-semibold">Live Alerts</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
                     <TableRow>
                       <TableHead>Alert</TableHead>
                       <TableHead className="text-right">Severity</TableHead>
                     </TableRow>
-                  </TableHeader> */}
-                  {/* <TableBody>
+                  </TableHeader>
+                  <TableBody>
                     {alerts.map((alert, index) => (
                       <TableRow key={index}>
                         <TableCell className="font-medium">{alert.message}</TableCell>
@@ -129,10 +129,10 @@ export default function DashboardPage() {
                         </TableCell>
                       </TableRow>
                     ))}
-                  </TableBody> */}
-                {/* </Table> */}
-              {/* </CardContent> */}
-            {/* </Card> */}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
           </div>
       <FloatingChatbot threatContext={threatContext} />
     </div>
