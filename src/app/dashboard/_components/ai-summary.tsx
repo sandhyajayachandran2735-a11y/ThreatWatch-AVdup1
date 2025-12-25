@@ -73,7 +73,7 @@ export function AIThreatSummary({
           )}
           Generate Summary
         </Button>
-      </Footer>
+      </CardFooter>
     </Card>
   );
 }
