@@ -8,8 +8,6 @@ import { ThreatAdvisorChatbot } from './threat-advisor-chatbot';
 interface FloatingChatbotProps {
   threatContext: {
     sybilAlerts: number;
-    gpsSpoofingEvents: number;
-    sensorAnomalies: number;
   };
 }
 

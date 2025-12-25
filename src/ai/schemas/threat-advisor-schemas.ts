@@ -8,8 +8,6 @@ const MessageSchema = z.object({
 export const AskThreatAdvisorInputSchema = z.object({
   threatContext: z.object({
     sybilAlerts: z.number().describe('The current count of Sybil alerts.'),
-    gpsSpoofingEvents: z.number().describe('The current count of GPS spoofing events.'),
-    sensorAnomalies: z.number().describe('The current count of sensor anomalies.'),
   }),
   history: z.array(MessageSchema).describe('The conversation history between the user and the assistant.'),
 });

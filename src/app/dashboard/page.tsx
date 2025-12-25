@@ -46,8 +46,6 @@ const severityConfig = {
 export default function DashboardPage() {
   const threatContext = {
     sybilAlerts: metrics.sybilAlerts,
-    gpsSpoofingEvents: metrics.gpsSpoofing,
-    sensorAnomalies: metrics.sensorFlags,
   };
 
   return (

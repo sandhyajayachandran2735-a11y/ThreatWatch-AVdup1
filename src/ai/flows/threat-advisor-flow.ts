@@ -31,8 +31,6 @@ You must adhere to the following principles:
 
 CURRENT THREAT CONTEXT:
 - Sybil Alerts Detected: {{threatContext.sybilAlerts}}
-- GPS Spoofing Events: {{threatContext.gpsSpoofingEvents}}
-- Sensor Anomalies: {{threatContext.sensorAnomalies}}
 
 CONVERSATION HISTORY:
 {{#each history}}

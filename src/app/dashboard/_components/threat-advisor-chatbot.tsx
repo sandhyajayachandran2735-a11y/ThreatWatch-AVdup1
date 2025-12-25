@@ -25,8 +25,6 @@ type Message = {
 interface ThreatAdvisorChatbotProps {
   threatContext: {
     sybilAlerts: number;
-    gpsSpoofingEvents: number;
-    sensorAnomalies: number;
   };
 }
 
