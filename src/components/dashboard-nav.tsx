@@ -25,7 +25,7 @@ const navItems = [
   // { href: '/dashboard/gps-spoofing', icon: MapPin, label: 'GPS Spoofing' },
   // { href: '/dashboard/sensor-spoofing', icon: Radar, label: 'Sensor Spoofing' },
   { href: '/dashboard/missions', icon: Rocket, label: 'Missions' },
-  { href: '/dashboard/logs', icon: FileText, label: 'System Logs' },
+  // { href: '/dashboard/logs', icon: FileText, label: 'System Logs' },
   { href: '/dashboard/history', icon: History, label: 'History' },
 ];
 

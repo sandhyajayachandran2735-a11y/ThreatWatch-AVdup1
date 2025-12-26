@@ -107,32 +107,22 @@ export function LandingPage() {
                   </p>
                 </CardContent>
               </Card>
-              <Card className="text-center">
+              <Card className="text-center bg-muted/50">
                 <CardHeader className="items-center">
-                  <div className="rounded-full bg-primary/10 p-4 text-primary">
+                  <div className="rounded-full bg-muted p-4 text-muted-foreground">
                     <MapPin className="h-8 w-8" />
                   </div>
                   <CardTitle className="mt-4">GPS Spoofing Analysis</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2">
-                  <p className="text-sm text-muted-foreground">
-                    GPS spoofing transmits false satellite signals to trick an
-                    AV into thinking it&apos;s somewhere it isn&apos;t. This
-                    can cause the vehicle to drive off-road, into oncoming
-                    traffic, or into other dangerous situations.
-                  </p>
-                  <p className="text-sm font-medium">
-                    Our system cross-references GPS data with inertial
-                    measurement units (IMU), cellular positioning, and other
-                    sensors to detect signal anomalies and alert the system to a
-                    potential spoofing event, ensuring safe and accurate
-                    navigation.
+                  <p className="font-semibold text-muted-foreground">
+                    Releasing Soon...
                   </p>
                 </CardContent>
               </Card>
-              <Card className="text-center">
+              <Card className="text-center bg-muted/50">
                 <CardHeader className="items-center">
-                  <div className="rounded-full bg-primary/10 p-4 text-primary">
+                  <div className="rounded-full bg-muted p-4 text-muted-foreground">
                     <Radar className="h-8 w-8" />
                   </div>
                   <CardTitle className="mt-4">
@@ -140,18 +130,8 @@ export function LandingPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2">
-                  <p className="text-sm text-muted-foreground">
-                    This sophisticated attack involves feeding false data to an
-                    AV&apos;s critical sensors (like LiDAR, cameras, or radar)
-                    to make it perceive phantom obstacles or, more dangerously,
-                    ignore real ones.
-                  </p>
-                  <p className="text-sm font-medium">
-                    ThreatWatch AV uses advanced machine learning algorithms to
-                    find inconsistencies across multiple sensor inputs,
-                    identifying and flagging manipulated data to prevent
-                    catastrophic accidents and ensure the vehicle perceives its
-                    true environment.
+                    <p className="font-semibold text-muted-foreground">
+                    Releasing Soon...
                   </p>
                 </CardContent>
               </Card>

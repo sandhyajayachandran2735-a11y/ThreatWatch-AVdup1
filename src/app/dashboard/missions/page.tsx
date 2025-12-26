@@ -45,13 +45,10 @@ import {
 import { PlusCircle, Trash2 } from 'lucide-react';
 
 const initialMissions = [
-  { id: 1, title: 'Alpha-7 Urban Route', status: 'In Progress', statusVariant: 'default' },
-  { id: 2, title: 'Bravo-3 Highway Test', status: 'Completed', statusVariant: 'secondary' },
-  { id: 3, title: 'Charlie-9 Night Run', status: 'Alert', statusVariant: 'destructive' },
-  { id: 4, title: 'Delta-1 Logistics', status: 'Completed', statusVariant: 'secondary' },
-  { id: 5, title: 'Echo-5 Suburban Path', status: 'Planned', statusVariant: 'outline' },
-  { id: 6, title: 'Foxtrot-2 Rain Test', status: 'In Progress', statusVariant: 'default' },
-];
+  { id: 1, title: 'Electronic-City', status: 'In Progress', statusVariant: 'default' },
+  { id: 2, title: 'White-Field', status: 'Planned', statusVariant: 'outline' },
+  { id: 3, title: 'Malleswaram', status: 'Planned', statusVariant: 'outline' },]
+
 
 const statusOptions = {
     'In Progress': 'default',
