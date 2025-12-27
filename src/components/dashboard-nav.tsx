@@ -23,7 +23,7 @@ const navItems = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { href: '/dashboard/sybil-detection', icon: Network, label: 'Sybil Detection' },
   // { href: '/dashboard/gps-spoofing', icon: MapPin, label: 'GPS Spoofing' },
-  // { href: '/dashboard/sensor-spoofing', icon: Radar, label: 'Sensor Spoofing' },
+  { href: '/dashboard/sensor-spoofing', icon: Radar, label: 'Sensor Spoofing' },
   { href: '/dashboard/missions', icon: Rocket, label: 'Missions' },
   // { href: '/dashboard/logs', icon: FileText, label: 'System Logs' },
   { href: '/dashboard/history', icon: History, label: 'History' },

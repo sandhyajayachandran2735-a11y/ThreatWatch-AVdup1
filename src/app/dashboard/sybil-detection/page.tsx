@@ -132,6 +132,7 @@ export default function SybilDetectionPage() {
 
       const result = await response.json();
       const isMalicious = result.prediction === 1;
+      
 
       setPrediction({
         isMalicious,
