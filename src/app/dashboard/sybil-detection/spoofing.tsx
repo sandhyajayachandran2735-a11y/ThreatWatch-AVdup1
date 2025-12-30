@@ -9,11 +9,12 @@ export default function SpoofingCard() {
       <h2 className="text-3xl font-extrabold text-gray-800 mb-4 tracking-wide">
         Gps spoofing
       </h2>
-      <p className="text-lg text-gray-700 italic">released soon...</p>
+      <p className="text-lg text-gray-700 italic">releasing soon...</p>
       <div className="mt-6 w-16 h-1 bg-gray-600 rounded-full"></div>
     </div>
   );
 }
+
 
 
 
