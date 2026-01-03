@@ -23,6 +23,8 @@ import { useToast } from '@/hooks/use-toast';
 import SpoofingCard from "../sybil-detection/spoofing";
 import SensorSpoofingCard from "../sybil-detection/sensor_spoofing";
 import { useMaliciousCount } from '../context/malicious-count-context';
+import { useFirestore } from '@/firebase';
+import { addSybilAttackLog } from '@/firebase/firestore/sybil-attacks';
 
 /* ---------------- SCHEMA ---------------- */
 
@@ -51,6 +53,7 @@ const sampleData = {
 export default function SybilDetectionPage() {
   const { toast } = useToast();
   const { maliciousCount, setMaliciousCount } = useMaliciousCount();
+  const firestore = useFirestore();
 
   const [isLoading, setIsLoading] = useState(false);
   const [prediction, setPrediction] = useState<{
@@ -65,6 +68,39 @@ export default function SybilDetectionPage() {
     resolver: zodResolver(DetectSybilAttackInputSchema),
     // defaultValues: sampleData.a,
   });
+
+  /* ---------------- COMMON PREDICTION HANDLER ---------------- */
+  const handlePredictionResult = (result: any) => {
+    const isMalicious = result.prediction === 1;
+    const confidence = result.confidence ?? 0.5;
+
+    setPrediction({
+      isMalicious,
+      confidence: confidence,
+      reasoning: isMalicious
+        ? `Random Forest detected Sybil behavior with ${Math.round(confidence * 100)}% confidence.`
+        : `Random Forest detected benign behavior with ${Math.round(confidence * 100)}% confidence.`,
+    });
+
+    if (isMalicious) {
+      setMaliciousCount((prev) => prev + 1);
+      // Log the attack to Firestore
+      addSybilAttackLog(firestore, {
+        sybilNodeCount: 1,
+        riskScore: confidence * 100,
+        nodes: [{
+            vehicleId: `V-${Math.floor(Math.random() * 900) + 100}`,
+            confidence: `${Math.round(confidence * 100)}%`,
+        }],
+      });
+    }
+
+    toast({
+      title: 'Prediction successful',
+      description: isMalicious ? 'Malicious activity detected!' : 'Behavior appears benign.',
+      variant: isMalicious ? 'destructive' : 'default',
+    });
+  };
 
   /* ---------------- MANUAL PREDICTION ---------------- */
 
@@ -83,28 +119,17 @@ export default function SybilDetectionPage() {
       if (!response.ok) {
         throw new Error(await response.text());
       }
-
+      
       const result = await response.json();
-      const isMalicious = result.prediction === 1;
+      handlePredictionResult(result);
 
-      setPrediction({
-        isMalicious,
-        confidence: result.confidence ?? 0.5,
-        reasoning: isMalicious
-          ? 'Random Forest detected Sybil behavior.'
-          : 'Random Forest detected benign behavior.',
-      });
-
-      if (isMalicious) {
-        setMaliciousCount((prev) => prev + 1);
-      }
-
-      toast({
-        title: 'Prediction successful',
-        description: 'Result received from backend',
-      });
     } catch (e: any) {
       setError(e.message);
+      toast({
+          title: 'Prediction Failed',
+          description: e.message,
+          variant: 'destructive'
+      })
     }
 
     setIsLoading(false);
@@ -133,21 +158,14 @@ export default function SybilDetectionPage() {
       }
 
       const result = await response.json();
-      const isMalicious = result.prediction === 1;
-
-      setPrediction({
-        isMalicious,
-        confidence: result.confidence ?? 0.5,
-        reasoning: isMalicious
-          ? 'Random Forest detected Sybil behavior from CSV.'
-          : 'Random Forest detected benign behavior from CSV.',
-      });
-
-      if (isMalicious) {
-        setMaliciousCount((prev) => prev + 1);
-      }
+      handlePredictionResult(result);
     } catch (e: any) {
       setError(e.message);
+      toast({
+          title: 'CSV Prediction Failed',
+          description: e.message,
+          variant: 'destructive'
+      })
     }
 
     setIsLoading(false);
@@ -163,13 +181,19 @@ export default function SybilDetectionPage() {
         <Card>
           <CardHeader>
             <CardTitle>Upload CSV</CardTitle>
-            <CardDescription>Upload vehicle data CSV</CardDescription>
+            <CardDescription>Upload vehicle data CSV for batch prediction.</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex h-40 flex-col items-center justify-center border-2 border-dashed rounded-lg">
               <UploadCloud className="h-10 w-10 text-muted-foreground mb-2" />
+               <Label htmlFor="csv-upload" className="cursor-pointer text-primary hover:underline">
+                Choose a file
+              </Label>
+               <p className="mt-1 text-sm text-muted-foreground">{file?.name || 'or drag and drop'}</p>
               <Input
+                id="csv-upload"
                 type="file"
+                className="sr-only"
                 accept=".csv"
                 onChange={(e) => setFile(e.target.files?.[0] || null)}
               />
@@ -177,7 +201,7 @@ export default function SybilDetectionPage() {
           </CardContent>
           <CardFooter>
             <Button onClick={handleCsvUpload} disabled={!file || isLoading} className="w-full">
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {isLoading && file && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Predict from CSV
             </Button>
           </CardFooter>
@@ -187,22 +211,24 @@ export default function SybilDetectionPage() {
         <Card>
           <CardHeader>
             <CardTitle>Manual Input</CardTitle>
-            <CardDescription>Enter feature values</CardDescription>
+            <CardDescription>Enter feature values for a single prediction.</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit(handleRunDetection)} className="grid grid-cols-2 gap-4">
               {Object.keys(sampleData.a).map((key) => (
                 <div key={key}>
-                  <Label>{key.replace(/_/g, ' ')}</Label>
+                  <Label htmlFor={key}>{key.replace(/_/g, ' ')}</Label>
                   <Controller
                     name={key as keyof DetectSybilAttackInput}
                     control={control}
                     render={({ field }) => (
                       <Input
+                        id={key}
                         type="number"
                         step="any"
-                        value={field.value}
-                        onChange={(e) => field.onChange(e.target.valueAsNumber)}
+                        placeholder={`e.g. ${sampleData.a[key as keyof typeof sampleData.a]}`}
+                        {...field}
+                        onChange={(e) => field.onChange(e.target.valueAsNumber || 0)}
                       />
                     )}
                   />
@@ -210,8 +236,8 @@ export default function SybilDetectionPage() {
               ))}
               <div className="col-span-2">
                 <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Predict
+                  {isLoading && !file && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Run Manual Prediction
                 </Button>
               </div>
             </form>
@@ -226,36 +252,34 @@ export default function SybilDetectionPage() {
         <Card>
           <CardHeader>
             <CardTitle>Prediction Result</CardTitle>
+             <CardDescription>Real-time analysis from the backend model.</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col items-center justify-center min-h-[630px] space-y-4">
             {isLoading ? (
-              <Loader2 className="h-10 w-10 animate-spin" />
+              <Loader2 className="h-10 w-10 animate-spin text-primary" />
             ) : error ? (
-              <div className="text-destructive text-center">
-                <AlertCircle className="mx-auto mb-2" />
-                {error}
+              <div className="text-destructive text-center flex flex-col items-center gap-2">
+                <AlertCircle className="h-10 w-10" />
+                <p className="font-semibold">Error</p>
+                <p className="text-sm max-w-sm">{error}</p>
               </div>
             ) : prediction ? (
-              <div className="text-center space-y-4">
+              <div className="text-center space-y-4 w-full">
                 {prediction.isMalicious ? (
-                  <div className="text-destructive text-2xl flex items-center justify-center gap-2">
+                  <div className="text-destructive text-2xl flex items-center justify-center gap-2 font-bold">
                     <AlertCircle /> Malicious
                   </div>
                 ) : (
-                  <div className="text-green-600 text-2xl flex items-center justify-center gap-2">
+                  <div className="text-success text-2xl flex items-center justify-center gap-2 font-bold">
                     <CheckCircle /> Benign
                   </div>
                 )}
                 <Gauge value={Math.round(prediction.confidence * 100)} label="Confidence" />
                 <Separator />
-                <p className="text-sm text-muted-foreground">{prediction.reasoning}</p>
-                {/* 👇 malicious count display */}
-                <p className="text-lg font-semibold text-destructive">
-                  Total Malicious Detected: {maliciousCount}
-                </p>
+                <p className="text-sm text-muted-foreground bg-muted p-3 rounded-md">{prediction.reasoning}</p>
               </div>
             ) : (
-              <p className="text-muted-foreground">Submit data to get prediction</p>
+              <p className="text-muted-foreground text-center">Submit data to get a prediction.</p>
             )}
           </CardContent>
         </Card>
