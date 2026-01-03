@@ -22,9 +22,6 @@ import { Gauge } from '@/components/gauge';
 import { useToast } from '@/hooks/use-toast';
 import SpoofingCard from "../sybil-detection/spoofing";
 import SensorSpoofingCard from "../sybil-detection/sensor_spoofing";
-import { useMaliciousCount } from '../context/malicious-count-context';
-import { useFirestore } from '@/firebase';
-import { addSybilAttackLog } from '@/firebase/firestore/sybil-attacks';
 
 /* ---------------- SCHEMA ---------------- */
 
@@ -52,8 +49,6 @@ const sampleData = {
 
 export default function SybilDetectionPage() {
   const { toast } = useToast();
-  const { maliciousCount, setMaliciousCount } = useMaliciousCount();
-  const firestore = useFirestore();
 
   const [isLoading, setIsLoading] = useState(false);
   const [prediction, setPrediction] = useState<{
@@ -81,20 +76,6 @@ export default function SybilDetectionPage() {
         ? `Random Forest detected Sybil behavior with ${Math.round(confidence * 100)}% confidence.`
         : `Random Forest detected benign behavior with ${Math.round(confidence * 100)}% confidence.`,
     });
-    
-    // Log every attack to Firestore, not just malicious ones
-    addSybilAttackLog(firestore, {
-        sybilNodeCount: isMalicious ? 1 : 0,
-        riskScore: confidence * 100,
-        nodes: [{
-            vehicleId: `V-${Math.floor(Math.random() * 900) + 100}`,
-            confidence: `${Math.round(confidence * 100)}%`,
-        }],
-    });
-
-    if (isMalicious) {
-      setMaliciousCount((prev) => prev + 1);
-    }
 
     toast({
       title: 'Prediction successful',
