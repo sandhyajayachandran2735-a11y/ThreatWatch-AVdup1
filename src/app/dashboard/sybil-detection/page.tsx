@@ -81,18 +81,19 @@ export default function SybilDetectionPage() {
         ? `Random Forest detected Sybil behavior with ${Math.round(confidence * 100)}% confidence.`
         : `Random Forest detected benign behavior with ${Math.round(confidence * 100)}% confidence.`,
     });
-
-    if (isMalicious) {
-      setMaliciousCount((prev) => prev + 1);
-      // Log the attack to Firestore
-      addSybilAttackLog(firestore, {
-        sybilNodeCount: 1,
+    
+    // Log every attack to Firestore, not just malicious ones
+    addSybilAttackLog(firestore, {
+        sybilNodeCount: isMalicious ? 1 : 0,
         riskScore: confidence * 100,
         nodes: [{
             vehicleId: `V-${Math.floor(Math.random() * 900) + 100}`,
             confidence: `${Math.round(confidence * 100)}%`,
         }],
-      });
+    });
+
+    if (isMalicious) {
+      setMaliciousCount((prev) => prev + 1);
     }
 
     toast({
