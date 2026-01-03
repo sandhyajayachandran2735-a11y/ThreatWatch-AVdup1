@@ -73,13 +73,13 @@ export default function SensorSpoofingPage() {
     setIsLoading(false);
   };
   
-  const loadSample = (sample: 'a' | 'b' | 'c') => {
-    reset(sampleData[sample]);
-    setPrediction(null);
-    setError(null);
-    setCsvData(null);
-    setFileName(null);
-  };
+  // const loadSample = (sample: 'a' | 'b' | 'c') => {
+  //   reset(sampleData[sample]);
+  //   setPrediction(null);
+  //   setError(null);
+  //   setCsvData(null);
+  //   setFileName(null);
+  // };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -167,11 +167,11 @@ export default function SensorSpoofingPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="mb-4 flex gap-2">
+            {/* <div className="mb-4 flex gap-2">
               <Button variant="outline" size="sm" onClick={() => loadSample('a')}>Sample A (Anomaly)</Button>
               <Button variant="outline" size="sm" onClick={() => loadSample('b')}>Sample B (Anomaly)</Button>
               <Button variant="outline" size="sm" onClick={() => loadSample('c')}>Sample C (Benign)</Button>
-            </div>
+            </div> */}
             <form onSubmit={handleSubmit(handleRunDetection)} className="grid grid-cols-2 gap-4">
                
                 <div className="space-y-2 col-span-2">

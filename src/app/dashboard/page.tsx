@@ -20,9 +20,11 @@ import { AlertTriangle, ShieldCheck, ShieldAlert } from 'lucide-react';
 import { AIThreatSummary } from './_components/ai-summary';
 import { LiveMap } from './_components/live-map';
 import { FloatingChatbot } from './_components/floating-chatbot';
+import { useMaliciousCount } from './context/malicious-count-context';
+
 
 const metrics = {
-  sybilAlerts: 14,
+  // sybilAlerts: 14, // This will now come from context
   gpsSpoofing:2,
   sensorFlags:3
 
@@ -44,8 +46,10 @@ const metrics = {
 // };
 
 export default function DashboardPage() {
+  const { maliciousCount } = useMaliciousCount();
+
   const threatContext = {
-    sybilAlerts: metrics.sybilAlerts,
+    sybilAlerts: maliciousCount,
   };
 
   return (
@@ -58,7 +62,7 @@ export default function DashboardPage() {
               <ShieldAlert className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{metrics.sybilAlerts}</div>
+              <div className="text-2xl font-bold">{maliciousCount}</div>
               <p className="text-xs text-muted-foreground">+2 since last hour</p>
             </CardContent>
           </Card>
@@ -86,7 +90,7 @@ export default function DashboardPage() {
 
           {/* AI Summary */}
         <AIThreatSummary
-          sybilAlertsToday={metrics.sybilAlerts}
+          sybilAlertsToday={maliciousCount}
         />
         
         

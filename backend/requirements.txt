@@ -4,4 +4,3 @@ pydantic
 numpy
 scikit-learn
 python-multipart
-pickle-mixin

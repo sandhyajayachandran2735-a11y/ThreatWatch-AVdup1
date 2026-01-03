@@ -22,16 +22,15 @@ import { Gauge } from '@/components/gauge';
 import { useToast } from '@/hooks/use-toast';
 import SpoofingCard from "../sybil-detection/spoofing";
 import SensorSpoofingCard from "../sybil-detection/sensor_spoofing";
-
+import { useMaliciousCount } from '../context/malicious-count-context';
 
 /* ---------------- SCHEMA ---------------- */
 
 const DetectSybilAttackInputSchema = z.object({
-
   x: z.number(),
-  y:z.number(),
-  speed:z.number(),
-  acceleration:z.number(),
+  y: z.number(),
+  speed: z.number(),
+  acceleration: z.number(),
 });
 
 type DetectSybilAttackInput = z.infer<typeof DetectSybilAttackInputSchema>;
@@ -40,11 +39,10 @@ type DetectSybilAttackInput = z.infer<typeof DetectSybilAttackInputSchema>;
 
 const sampleData = {
   a: {
-   x: 156.0186,
-   y:869.6497,
-   speed:14.29872,
-   acceleration:-0.10746
-    
+    x: 156.0186,
+    y: 869.6497,
+    speed: 14.29872,
+    acceleration: -0.10746
   },
 };
 
@@ -52,6 +50,7 @@ const sampleData = {
 
 export default function SybilDetectionPage() {
   const { toast } = useToast();
+  const { maliciousCount, setMaliciousCount } = useMaliciousCount();
 
   const [isLoading, setIsLoading] = useState(false);
   const [prediction, setPrediction] = useState<{
@@ -86,7 +85,6 @@ export default function SybilDetectionPage() {
       }
 
       const result = await response.json();
-
       const isMalicious = result.prediction === 1;
 
       setPrediction({
@@ -96,6 +94,10 @@ export default function SybilDetectionPage() {
           ? 'Random Forest detected Sybil behavior.'
           : 'Random Forest detected benign behavior.',
       });
+
+      if (isMalicious) {
+        setMaliciousCount((prev) => prev + 1);
+      }
 
       toast({
         title: 'Prediction successful',
@@ -132,7 +134,6 @@ export default function SybilDetectionPage() {
 
       const result = await response.json();
       const isMalicious = result.prediction === 1;
-      
 
       setPrediction({
         isMalicious,
@@ -141,6 +142,10 @@ export default function SybilDetectionPage() {
           ? 'Random Forest detected Sybil behavior from CSV.'
           : 'Random Forest detected benign behavior from CSV.',
       });
+
+      if (isMalicious) {
+        setMaliciousCount((prev) => prev + 1);
+      }
     } catch (e: any) {
       setError(e.message);
     }
@@ -212,60 +217,50 @@ export default function SybilDetectionPage() {
             </form>
           </CardContent>
         </Card>
-        
-        <SpoofingCard /> 
-       
-     
-         </div>
-      
 
+        <SpoofingCard />
+      </div>
 
       {/* RIGHT COLUMN */}
       <div className="flex flex-col gap-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Prediction Result</CardTitle>
-        </CardHeader>
-        <CardContent className="flex items-center justify-center min-h-[630px]">
-          {isLoading ? (
-            <Loader2 className="h-10 w-10 animate-spin" />
-          ) : error ? (
-            <div className="text-destructive text-center">
-              <AlertCircle className="mx-auto mb-2" />
-              {error}
-            </div>
-          ) : prediction ? (
-            <div className="text-center space-y-4">
-              {prediction.isMalicious ? (
-                <div className="text-destructive text-2xl flex items-center justify-center gap-2">
-                  <AlertCircle /> Malicious
-                </div>
-              ) : (
-                <div className="text-green-600 text-2xl flex items-center justify-center gap-2">
-                  <CheckCircle /> Benign
-                </div>
-              )}
-              <Gauge value={Math.round(prediction.confidence * 100)} label="Confidence" />
-              <Separator />
-              <p className="text-sm text-muted-foreground">{prediction.reasoning}</p>
-            </div>
-          ) : (
-            <p className="text-muted-foreground">Submit data to get prediction</p>
-          )}
-        </CardContent>
-       </Card>
-      <SensorSpoofingCard/> 
-    </div>
+        <Card>
+          <CardHeader>
+            <CardTitle>Prediction Result</CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col items-center justify-center min-h-[630px] space-y-4">
+            {isLoading ? (
+              <Loader2 className="h-10 w-10 animate-spin" />
+            ) : error ? (
+              <div className="text-destructive text-center">
+                <AlertCircle className="mx-auto mb-2" />
+                {error}
+              </div>
+            ) : prediction ? (
+              <div className="text-center space-y-4">
+                {prediction.isMalicious ? (
+                  <div className="text-destructive text-2xl flex items-center justify-center gap-2">
+                    <AlertCircle /> Malicious
+                  </div>
+                ) : (
+                  <div className="text-green-600 text-2xl flex items-center justify-center gap-2">
+                    <CheckCircle /> Benign
+                  </div>
+                )}
+                <Gauge value={Math.round(prediction.confidence * 100)} label="Confidence" />
+                <Separator />
+                <p className="text-sm text-muted-foreground">{prediction.reasoning}</p>
+                {/* 👇 malicious count display */}
+                <p className="text-lg font-semibold text-destructive">
+                  Total Malicious Detected: {maliciousCount}
+                </p>
+              </div>
+            ) : (
+              <p className="text-muted-foreground">Submit data to get prediction</p>
+            )}
+          </CardContent>
+        </Card>
+        <SensorSpoofingCard />
+      </div>
     </div>
   );
 }
-// import React from "react";
-
-// export default function SpoofingCard() {
-//   return (
-//     <div className="bg-gray-300 w-1/2 mx-auto p-6 rounded-lg shadow-md text-center">
-//       <h2 className="text-xl font-semibold mb-2">Gps spoofing</h2>
-//       <p className="text-sm text-gray-700">released soon...</p>
-//     </div>
-//   );
-// }
