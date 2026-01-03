@@ -89,6 +89,7 @@ export default function HistoryPage() {
           <TableHeader>
             <TableRow>
               <TableHead className="w-[200px]">Timestamp</TableHead>
+              <TableHead className="text-center">Result</TableHead>
               <TableHead className="text-center">Risk Score</TableHead>
               <TableHead className="text-center">Sybil Nodes</TableHead>
               <TableHead>Involved Nodes</TableHead>
@@ -98,6 +99,11 @@ export default function HistoryPage() {
             {formattedLogs.map((log) => (
               <TableRow key={log.id}>
                 <TableCell className="font-mono text-sm">{log.formattedTimestamp}</TableCell>
+                <TableCell className="text-center">
+                    <Badge variant={log.sybilNodeCount > 0 ? 'destructive' : 'secondary'}>
+                        {log.sybilNodeCount > 0 ? 'Malicious' : 'Benign'}
+                    </Badge>
+                </TableCell>
                 <TableCell className="text-center">
                   <Badge variant={log.riskScore > 75 ? 'destructive' : log.riskScore > 40 ? 'secondary' : 'default'}>
                     {log.riskScore.toFixed(0)}%
