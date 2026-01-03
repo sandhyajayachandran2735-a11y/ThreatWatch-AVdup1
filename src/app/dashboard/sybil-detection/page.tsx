@@ -53,7 +53,7 @@ const sampleData = {
 
 export default function SybilDetectionPage() {
   const { toast } = useToast();
-  const { setMaliciousCount } = useMaliciousCount();
+  const { maliciousCount, setMaliciousCount } = useMaliciousCount();
   const firestore = useFirestore();
 
 
@@ -264,6 +264,10 @@ export default function SybilDetectionPage() {
               </div>
             ) : prediction ? (
               <div className="text-center space-y-4 w-full">
+                <div className="text-center">
+                    <p className="text-sm font-medium text-muted-foreground">Total Malicious Alerts Today</p>
+                    <p className="text-2xl font-bold">{maliciousCount}</p>
+                </div>
                 {prediction.isMalicious ? (
                   <div className="text-destructive text-2xl flex items-center justify-center gap-2 font-bold">
                     <AlertCircle /> Malicious
