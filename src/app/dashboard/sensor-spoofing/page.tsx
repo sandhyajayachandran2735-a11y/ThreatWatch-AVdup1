@@ -17,114 +17,98 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { AlertCircle, CheckCircle, Loader2, ShieldQuestion, UploadCloud } from 'lucide-react';
 import { Gauge } from '@/components/gauge';
-import { getSensorAnomalyPrediction } from '@/app/actions';
-import {
-  DetectSensorAnomalyInputSchema,
-  type DetectSensorAnomalyInput,
-  type DetectSensorAnomalyOutput,
-} from '@/ai/schemas/detect-sensor-anomaly-schemas';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useToast } from '@/hooks/use-toast';
+import * as z from 'zod';
 
-const sampleData = {
-  a: { sensor_type: 'LIDAR', reading: 150.5, redundancy_check_ok: 0, time_since_last_reading_ms: 5, expected_range_min: 20, expected_range_max: 100 },
-  b: { sensor_type: 'CAMERA', reading: 1, redundancy_check_ok: 0, time_since_last_reading_ms: 33, expected_range_min: 0, expected_range_max: 1 },
-  c: { sensor_type: 'RADAR', reading: 45.2, redundancy_check_ok: 1, time_since_last_reading_ms: 40, expected_range_min: 1, expected_range_max: 200 },
+// Define the schema for the new input format
+const SensorSpoofingInputSchema = z.object({
+  speed_kmh: z.number(),
+  acceleration_mps2: z.number(),
+  lane_deviation: z.number(),
+  obstacle_distance: z.number(),
+  traffic_density: z.number(),
+});
+
+type SensorSpoofingInput = z.infer<typeof SensorSpoofingInputSchema>;
+
+const defaultValues: SensorSpoofingInput = {
+    speed_kmh: 44.94,
+    acceleration_mps2: -0.75,
+    lane_deviation: 0.96,
+    obstacle_distance: 4.26,
+    traffic_density: 41,
 };
-
-const sensorTypes = ["LIDAR", "RADAR", "CAMERA", "IMU", "GPS"];
 
 
 export default function SensorSpoofingPage() {
   const [isLoading, setIsLoading] = useState(false);
-  const [prediction, setPrediction] = useState<DetectSensorAnomalyOutput | null>(null);
+  const [prediction, setPrediction] = useState<{ action: string, confidence: number } | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [fileName, setFileName] = useState<string | null>(null);
-  const [csvData, setCsvData] = useState<DetectSensorAnomalyInput | null>(null);
-  type SensorType = "LIDAR" | "CAMERA" | "RADAR" | "IMU" | "GPS";
+  const [file, setFile] = useState<File | null>(null);
+  const { toast } = useToast();
 
-  const defaultValues: {
-    sensor_type: SensorType;
-    reading: number;
-    redundancy_check_ok: number;
-    time_since_last_reading_ms: number;
-    expected_range_min: number;
-    expected_range_max: number;
-  } = {
-    sensor_type: 'LIDAR', reading: 150.5, redundancy_check_ok: 0, time_since_last_reading_ms: 5, expected_range_min: 20, expected_range_max: 100 };
-    
-
-  const { control, handleSubmit, reset } = useForm<DetectSensorAnomalyInput>({
-    resolver: zodResolver(DetectSensorAnomalyInputSchema),
+  const { control, handleSubmit, reset } = useForm<SensorSpoofingInput>({
+    resolver: zodResolver(SensorSpoofingInputSchema),
     defaultValues: defaultValues,
   });
 
-  const handleRunDetection = async (data: DetectSensorAnomalyInput) => {
+  const handlePredictionResult = (result: any) => {
+    if (result.action) {
+        setPrediction({
+            action: result.action,
+            confidence: result.confidence ?? 0.5,
+        });
+        toast({
+            title: 'Analysis Complete',
+            description: `Action: ${result.action}`,
+            variant: result.prediction === 1 ? 'destructive' : 'default',
+        });
+    } else {
+        throw new Error("Invalid response from backend.");
+    }
+  };
+
+  const runPrediction = async (url: string, body: BodyInit) => {
     setIsLoading(true);
     setPrediction(null);
     setError(null);
+    
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        body: body,
+        headers: body instanceof FormData ? undefined : { 'Content-Type': 'application/json' },
+      });
 
-    const predictionResult = await getSensorAnomalyPrediction(data);
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.detail || 'An unknown error occurred.');
+      }
+      
+      const result = await response.json();
+      handlePredictionResult(result);
 
-    if (predictionResult.error || !predictionResult.result) {
-      setError(predictionResult.error || 'An unknown error occurred.');
-    } else {
-      setPrediction(predictionResult.result);
+    } catch (e: any) {
+      setError(e.message);
+      toast({
+          title: 'Prediction Failed',
+          description: e.message,
+          variant: 'destructive'
+      })
     }
     setIsLoading(false);
   };
-  
-  // const loadSample = (sample: 'a' | 'b' | 'c') => {
-  //   reset(sampleData[sample]);
-  //   setPrediction(null);
-  //   setError(null);
-  //   setCsvData(null);
-  //   setFileName(null);
-  // };
-
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) {
-      return;
-    }
-    setFileName(file.name);
-    setCsvData(null);
-    setPrediction(null);
-    setError(null);
 
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      try {
-        const text = e.target?.result as string;
-        const lines = text.split('\n');
-        const headers = lines[0].split(',').map(h => h.trim());
-        const dataRow = lines[1].split(',');
+  const handleRunDetection = async (data: SensorSpoofingInput) => {
+    runPrediction('https://sybil-backend.onrender.com/predict-sensor-json', JSON.stringify({ features: Object.values(data) }));
+  };
 
-        const dataObject: { [key: string]: any } = {};
-        headers.forEach((header, index) => {
-          if (Object.keys(sampleData.a).includes(header)) {
-             const value = dataRow[index].trim();
-             if (header === 'sensor_type') {
-                dataObject[header] = value;
-             } else {
-                dataObject[header] = parseFloat(value);
-             }
-          }
-        });
-        
-        const parsedData = DetectSensorAnomalyInputSchema.safeParse(dataObject);
-        if (parsedData.success) {
-          reset(parsedData.data);
-          setCsvData(parsedData.data);
-        } else {
-          throw new Error("CSV file format is incorrect or doesn't contain required columns.");
-        }
-      } catch (e) {
-        setError(e instanceof Error ? e.message : "Failed to parse CSV file.");
-        console.error(e);
-      }
-    };
-    reader.readAsText(file);
+  const handleCsvUpload = async () => {
+    if (!file) return;
+    const formData = new FormData();
+    formData.append('file', file);
+    runPrediction('https://sybil-backend.onrender.com/predict-sensor-csv', formData);
   };
 
 
@@ -144,59 +128,31 @@ export default function SensorSpoofingPage() {
               <Label htmlFor="file-upload" className="cursor-pointer text-primary hover:underline">
                 Choose a file
               </Label>
-              <p className="mt-1 text-sm text-muted-foreground">{fileName || 'or drag and drop'}</p>
-              <Input id="file-upload" type="file" className="sr-only" onChange={handleFileChange} accept=".csv" />
+              <p className="mt-1 text-sm text-muted-foreground">{file?.name || 'or drag and drop'}</p>
+              <Input id="file-upload" type="file" className="sr-only" onChange={(e) => setFile(e.target.files?.[0] || null)} accept=".csv" />
             </div>
           </CardContent>
            <CardFooter>
             <Button
-              onClick={() => csvData && handleRunDetection(csvData)}
-              disabled={!csvData || isLoading}
+              onClick={handleCsvUpload}
+              disabled={!file || isLoading}
               className="w-full"
             >
-              {isLoading && csvData ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+              {isLoading && file ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
               Run CSV Analysis
             </Button>
           </CardFooter>
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle className="text-xl font-semibold">Run Sensor Anomaly Detection</CardTitle>
+            <CardTitle className="text-xl font-semibold">Run Sensor Spoofing Detection</CardTitle>
             <CardDescription>
-              Enter sensor data manually to analyze for anomalies or load a sample.
+              Enter sensor data manually to analyze for potential spoofing.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {/* <div className="mb-4 flex gap-2">
-              <Button variant="outline" size="sm" onClick={() => loadSample('a')}>Sample A (Anomaly)</Button>
-              <Button variant="outline" size="sm" onClick={() => loadSample('b')}>Sample B (Anomaly)</Button>
-              <Button variant="outline" size="sm" onClick={() => loadSample('c')}>Sample C (Benign)</Button>
-            </div> */}
             <form onSubmit={handleSubmit(handleRunDetection)} className="grid grid-cols-2 gap-4">
-               
-                <div className="space-y-2 col-span-2">
-                    <Label>Sensor Type</Label>
-                    <Controller
-                        name="sensor_type"
-                        control={control}
-                        render={({ field }) => (
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Select sensor type" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {sensorTypes.map(type => (
-                                        <SelectItem key={type} value={type}>{type}</SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        )}
-                    />
-                </div>
-
-              {(Object.keys(sampleData.a) as Array<keyof DetectSensorAnomalyInput>).map((key) => {
-                  if (key === 'sensor_type') return null;
-                  return (
+              {(Object.keys(defaultValues) as Array<keyof SensorSpoofingInput>).map((key) => (
                     <div key={key} className="space-y-2">
                         <Label htmlFor={key} className="capitalize">{key.replace(/_/g, ' ')}</Label>
                         <Controller
@@ -207,11 +163,10 @@ export default function SensorSpoofingPage() {
                             )}
                         />
                     </div>
-                  )
-              })}
+              ))}
               <div className="col-span-2">
                   <Button type="submit" className="w-full" disabled={isLoading}>
-                      {isLoading && !csvData ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                      {isLoading && !file ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                       Run Manual Detection
                   </Button>
               </div>
@@ -221,8 +176,8 @@ export default function SensorSpoofingPage() {
       </div>
       <Card>
         <CardHeader>
-          <CardTitle className="text-xl font-semibold">AI Detection Results</CardTitle>
-          <CardDescription>Real-time analysis from the AI model.</CardDescription>
+          <CardTitle className="text-xl font-semibold">Detection Results</CardTitle>
+          <CardDescription>Real-time analysis from the sensor spoofing model.</CardDescription>
         </CardHeader>
         <CardContent className="min-h-[300px] flex items-center justify-center">
         {isLoading ? (
@@ -231,22 +186,22 @@ export default function SensorSpoofingPage() {
             <div className="text-center text-destructive flex flex-col items-center gap-2">
                 <AlertCircle className="h-10 w-10" />
                 <p className="font-semibold">Error</p>
-                <p className="text-sm">{error}</p>
+                <p className="max-w-xs">{error}</p>
             </div>
         ) : prediction ? (
           <div className="w-full space-y-6">
             <div className="flex flex-col items-center justify-around gap-6 sm:flex-row">
                  <div className="text-center">
-                    <p className="text-sm font-medium text-muted-foreground">Result</p>
-                    {prediction.isAnomaly ? (
-                        <div className="flex items-center gap-2 text-2xl font-bold text-destructive">
-                            <AlertCircle />
-                            <span>Anomaly Detected</span>
+                    <p className="text-sm font-medium text-muted-foreground">Action Required</p>
+                    {prediction.action === 'Normal Driving' ? (
+                        <div className="flex items-center gap-2 text-2xl font-bold text-success">
+                            <CheckCircle />
+                            <span>{prediction.action}</span>
                         </div>
                     ) : (
-                         <div className="flex items-center gap-2 text-2xl font-bold text-success">
-                            <CheckCircle />
-                            <span>Nominal</span>
+                         <div className="flex items-center gap-2 text-2xl font-bold text-destructive">
+                            <AlertCircle />
+                            <span>{prediction.action}</span>
                         </div>
                     )}
                  </div>
@@ -257,13 +212,13 @@ export default function SensorSpoofingPage() {
             <Separator />
             <div>
                 <h3 className="font-medium mb-2">Reasoning</h3>
-                <p className="text-sm text-muted-foreground bg-muted p-3 rounded-md">{prediction.reasoning}</p>
+                <p className="text-sm text-muted-foreground bg-muted p-3 rounded-md">The model determined the action '{prediction.action}' with {Math.round(prediction.confidence * 100)}% confidence based on the input sensor readings.</p>
             </div>
           </div>
         ) : (
            <div className="text-center text-muted-foreground flex flex-col items-center gap-2">
                 <ShieldQuestion className="h-10 w-10" />
-                <p>Submit sensor data to see the AI prediction.</p>
+                <p>Submit sensor data to see the model's prediction.</p>
             </div>
         )}
         </CardContent>
