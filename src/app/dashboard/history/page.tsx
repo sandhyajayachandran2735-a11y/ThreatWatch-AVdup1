@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useMemo } from 'react';
@@ -46,20 +47,19 @@ export default function HistoryPage() {
   const { data: logs, isLoading, error } = useCollection<DetectionLog>(detectionLogsQuery);
 
   const formattedLogs = useMemo(() => {
-    return logs?.map(log => ({
-      ...log,
-      formattedTimestamp: log.detectedAt
-        ? format(new Date(log.detectedAt.seconds * 1000), "yyyy-MM-dd HH:mm:ss")
-        : 'Pending...',
+    return logs
+      ?.filter(log => log.type === 'Sybil')
+      .map(log => ({
+        ...log,
+        formattedTimestamp: log.detectedAt
+          ? format(new Date(log.detectedAt.seconds * 1000), "yyyy-MM-dd HH:mm:ss")
+          : 'Pending...',
     }));
   }, [logs]);
 
   const getResultBadgeVariant = (log: DetectionLog): 'destructive' | 'secondary' | 'default' => {
       if (log.type === 'Sybil') {
           return log.result === 'Malicious' ? 'destructive' : 'secondary';
-      }
-      if (log.type === 'Sensor Spoofing') {
-          return log.result === 'Normal Driving' ? 'secondary' : 'destructive';
       }
       return 'default';
   }
@@ -86,8 +86,8 @@ export default function HistoryPage() {
     if (!formattedLogs || formattedLogs.length === 0) {
       return (
         <div className="py-8 text-center text-muted-foreground">
-          <p>No detection history found.</p>
-          <p className="text-sm">Run a detection on the Sybil or Sensor Spoofing pages to see logs here.</p>
+          <p>No Sybil attack detection history found.</p>
+          <p className="text-sm">Run a detection on the Sybil page to see logs here.</p>
         </div>
       );
     }
@@ -98,7 +98,6 @@ export default function HistoryPage() {
           <TableHeader>
             <TableRow>
               <TableHead className="w-[200px]">Timestamp</TableHead>
-              <TableHead>Type</TableHead>
               <TableHead>Result</TableHead>
               <TableHead className="text-center">Confidence</TableHead>
               <TableHead>Details</TableHead>
@@ -108,9 +107,6 @@ export default function HistoryPage() {
             {formattedLogs.map((log) => (
               <TableRow key={log.id}>
                 <TableCell className="font-mono text-sm">{log.formattedTimestamp}</TableCell>
-                <TableCell>
-                    <Badge variant={log.type === 'Sybil' ? 'default' : 'outline'}>{log.type}</Badge>
-                </TableCell>
                 <TableCell>
                     <Badge variant={getResultBadgeVariant(log)}>
                         {log.result}
@@ -135,10 +131,10 @@ export default function HistoryPage() {
       <CardHeader>
         <CardTitle className="text-2xl font-semibold font-headline flex items-center gap-2">
             <HistoryIcon />
-            Detection History
+            Sybil Attack History
         </CardTitle>
         <CardDescription>
-          A log of all Sybil attack and Sensor Spoofing analyses that have been performed.
+          A log of all Sybil attack analyses that have been performed.
         </CardDescription>
       </CardHeader>
       <CardContent>
