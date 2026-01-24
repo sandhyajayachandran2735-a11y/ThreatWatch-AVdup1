@@ -1,3 +1,6 @@
+
+
+
 'use client';
 
 import { useState } from 'react';
@@ -45,9 +48,9 @@ import {
 import { PlusCircle, Trash2 } from 'lucide-react';
 
 const initialMissions = [
-  { id: 1, title: 'Electronic-City', status: 'In Progress', statusVariant: 'default' },
-  { id: 2, title: 'White-Field', status: 'Planned', statusVariant: 'outline' },
-  { id: 3, title: 'Malleswaram', status: 'Planned', statusVariant: 'outline' },]
+  { id: 1, title: 'Bangalore', status: 'In Progress', statusVariant: 'default' },
+  { id: 2, title: 'Chennai', status: 'Planned', statusVariant: 'outline' },
+  { id: 3, title: 'Mumbai', status: 'Planned', statusVariant: 'outline' },]
 
 
 const statusOptions = {

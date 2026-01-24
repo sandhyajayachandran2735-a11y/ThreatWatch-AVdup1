@@ -286,7 +286,7 @@ export default function SybilDetectionPage() {
             )}
           </CardContent>
         </Card>
-        <SensorSpoofingCard />
+        {/* <SensorSpoofingCard /> */}
       </div>
     </div>
   );

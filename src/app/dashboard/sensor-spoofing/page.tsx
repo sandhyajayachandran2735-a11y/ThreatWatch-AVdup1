@@ -77,6 +77,7 @@ export default function SensorSpoofingPage() {
       const response = await fetch(url, {
         method: 'POST',
         body: body,
+          mode: 'cors',
         headers: body instanceof FormData ? undefined : { 'Content-Type': 'application/json' },
       });
 

@@ -25,11 +25,11 @@
 //   { timestamp: '2024-05-21 14:40:01', module: 'SYSTEM', message: 'Critical Threat: GPS spoofing probability > 80%', severity: 'danger' },
 // ];
 
-// const severityConfig = {
-//   danger: { label: 'Danger', className: 'bg-destructive text-destructive-foreground' },
-//   warning: { label: 'Warning', className: 'bg-warning text-warning-foreground' },
-//   info: { label: 'Info', className: 'bg-secondary text-secondary-foreground' },
-// };
+const severityConfig = {
+  danger: { label: 'Danger', className: 'bg-destructive text-destructive-foreground' },
+  warning: { label: 'Warning', className: 'bg-warning text-warning-foreground' },
+  info: { label: 'Info', className: 'bg-secondary text-secondary-foreground' },
+};
 
 // export default function LogsPage() {
   // return (

@@ -120,9 +120,9 @@ export function LandingPage() {
                   </p>
                 </CardContent>
               </Card>
-              <Card className="text-center bg-muted/50">
+              <Card className="text-center">
                 <CardHeader className="items-center">
-                  <div className="rounded-full bg-muted p-4 text-muted-foreground">
+                  <div className="rounded-full bg-primary/10 p-4 text-primary">
                     <Radar className="h-8 w-8" />
                   </div>
                   <CardTitle className="mt-4">
@@ -130,9 +130,12 @@ export function LandingPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2">
-                    <p className="font-semibold text-muted-foreground">
-                    Releasing Soon...
-                  </p>
+                    <p className="text-sm text-muted-foreground">
+                      Sensor spoofing feeds false data to a vehicle's sensors (like LIDAR or cameras) to manipulate its perception of the environment, which can lead to dangerous driving decisions.
+                    </p>
+                    <p className="text-sm font-medium">
+                      ThreatWatch AV uses machine learning to analyze sensor data for anomalies, comparing readings against expected values to detect spoofing attempts and safeguard the vehicle.
+                    </p>
                 </CardContent>
               </Card>
             </div>

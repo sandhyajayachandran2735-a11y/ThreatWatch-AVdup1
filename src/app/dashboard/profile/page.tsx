@@ -25,6 +25,7 @@ import { Loader2 } from 'lucide-react';
 import { useUser, useAuth } from '@/firebase';
 import { updateProfile, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 
 const nameFormSchema = z.object({
@@ -154,7 +155,7 @@ export default function ProfilePage() {
                 />
               </div>
                <div className="space-y-2">
-                <Label>Email</Label>
+                 <Label>Email</Label> 
                 <Input value={user?.email || ''} disabled />
               </div>
               <Button type="submit" disabled={nameForm.formState.isSubmitting}>
