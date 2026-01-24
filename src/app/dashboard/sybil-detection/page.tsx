@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -38,6 +39,13 @@ const DetectSybilAttackInputSchema = z.object({
 
 type DetectSybilAttackInput = z.infer<typeof DetectSybilAttackInputSchema>;
 
+// Define the type for the backend response
+type SybilPredictionResult = {
+  prediction: 0 | 1;
+  confidence: number;
+  used_features?: string[];
+};
+
 /* ---------------- SAMPLE DATA ---------------- */
 
 const sampleData = {
@@ -72,7 +80,7 @@ export default function SybilDetectionPage() {
   });
 
   /* ---------------- COMMON PREDICTION HANDLER ---------------- */
-  const handlePredictionResult = (result: any) => {
+  const handlePredictionResult = (result: SybilPredictionResult) => {
     const isMalicious = result.prediction === 1;
     const confidence = result.confidence ?? 0.5;
 
@@ -120,7 +128,7 @@ export default function SybilDetectionPage() {
         throw new Error(await response.text());
       }
       
-      const result = await response.json();
+      const result: SybilPredictionResult = await response.json();
       handlePredictionResult(result);
 
     } catch (e: any) {
@@ -157,7 +165,7 @@ export default function SybilDetectionPage() {
         throw new Error(await response.text());
       }
 
-      const result = await response.json();
+      const result: SybilPredictionResult = await response.json();
       handlePredictionResult(result);
     } catch (e: any) {
       setError(e.message);
