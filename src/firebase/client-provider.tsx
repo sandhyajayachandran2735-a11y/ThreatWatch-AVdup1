@@ -1,15 +1,21 @@
 'use client';
 
 import React, { useMemo, type ReactNode, useEffect } from 'react';
-import { FirebaseProvider, useAuth } from '@/firebase/provider';
+import { FirebaseProvider, useAuth, useUser } from '@/firebase/provider';
 import { initializeFirebase } from '@/firebase';
 import { initiateAnonymousSignIn } from './non-blocking-login';
 
 function AuthGate({ children }: { children: ReactNode }) {
   const auth = useAuth();
+  const { user, isUserLoading } = useUser();
+
   useEffect(() => {
-    initiateAnonymousSignIn(auth);
-  }, [auth]);
+    // Only sign in anonymously if we are done loading and there is no user.
+    // This prevents logged-in users from being converted to anonymous.
+    if (!isUserLoading && !user) {
+      initiateAnonymousSignIn(auth);
+    }
+  }, [auth, user, isUserLoading]);
 
   return <>{children}</>;
 }

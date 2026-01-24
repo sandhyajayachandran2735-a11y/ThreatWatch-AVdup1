@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
-import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { useCollection, useFirestore, useMemoFirebase, useUser } from '@/firebase';
 import { collection, query, orderBy } from 'firebase/firestore';
 import {
   Card,
@@ -36,11 +36,12 @@ type DetectionLog = {
 
 export default function HistoryPage() {
   const firestore = useFirestore();
+  const { user, isUserLoading } = useUser();
 
   const detectionLogsQuery = useMemoFirebase(() => {
-    if (!firestore) return null;
+    if (!firestore || !user) return null;
     return query(collection(firestore, 'detection_logs'), orderBy('detectedAt', 'desc'));
-  }, [firestore]);
+  }, [firestore, user]);
 
   const { data: logs, isLoading, error } = useCollection<DetectionLog>(detectionLogsQuery);
 
@@ -64,7 +65,7 @@ export default function HistoryPage() {
   }
 
   const renderContent = () => {
-    if (isLoading) {
+    if (isUserLoading || isLoading) {
       return (
         <div className="flex items-center justify-center p-8">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
