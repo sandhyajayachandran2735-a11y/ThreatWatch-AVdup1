@@ -102,6 +102,7 @@ service cloud.firestore {
      *   The `get` permission allows reading individual documents if needed.
      */
     match /detection_logs/{logId} {
+      // Allow authenticated users to create and read logs.
       allow create: if isSignedIn();
       allow get, list: if isSignedIn();
       allow update, delete: if false;
