@@ -17,16 +17,15 @@
  *
  * Key Security Decisions:
  * 1. Backend-Only Writes: All write operations (`create`, `update`, `delete`) are
- *    explicitly denied for client SDKs. This is the cornerstone of the security
+ *    explicitly denied for client SDKs for most collections. This is the cornerstone of the security
  *    model, ensuring data integrity by routing all changes through a controlled
  *    backend service.
  * 2. Public Read Access: Data within the collections is considered non-sensitive
  *    and is made available for public read (`get`, `list`). This supports client-side
  *    applications that need to display detection results or log data without
  *    requiring user authentication.
- * 3. No User Ownership: The data model does not associate records with specific
- *    users, so there are no ownership-based rules. Access is controlled at the
- *    collection level, not on a per-document basis.
+ * 3. Client-side writes for logs: The `detection_logs` collection allows authenticated
+ *    clients to write new log entries, but not modify or delete them.
  *
  * Denormalization for Authorization:
  * This principle is not heavily utilized as there are no user-specific permissions.
@@ -93,14 +92,14 @@ service cloud.firestore {
 
     /**
      * @description
-     * Stores logs of Sybil attack detection events. This data is written by clients
+     * Stores logs of all threat detection events (Sybil, Sensor, etc.). This data is written by clients
      * after running a detection analysis.
-     * @path /sybil_attacks/{sybilAttackId}
-     * @allow (create) Any authenticated user can create a new Sybil attack log.
-     * @allow (read) Any authenticated user can read the analysis history.
+     * @path /detection_logs/{logId}
+     * @allow (create) Any authenticated user can create a new detection log.
+     * @allow (read) Any authenticated user can read the detection history.
      * @deny (update, delete) All other operations are denied to clients.
      */
-    match /sybil_attacks/{sybilAttackId} {
+    match /detection_logs/{logId} {
       allow create: if isSignedIn();
       allow read: if isSignedIn();
       allow update, delete: if false;

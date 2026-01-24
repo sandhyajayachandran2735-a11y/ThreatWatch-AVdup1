@@ -75,45 +75,43 @@
         "riskScore"
       ]
     },
-    "SybilAttack": {
-      "title": "SybilAttack",
+    "DetectionLog": {
+      "title": "DetectionLog",
       "type": "object",
-      "description": "Represents a log of a Sybil attack detection event.",
+      "description": "Represents a log of a threat detection event.",
       "properties": {
         "detectedAt": {
           "type": "string",
           "format": "date-time",
           "description": "The timestamp when the detection occurred."
         },
-        "sybilNodeCount": {
-          "type": "number",
-          "description": "The number of Sybil nodes detected in this event."
+        "type": {
+          "type": "string",
+          "enum": [
+            "Sybil",
+            "Sensor Spoofing"
+          ],
+          "description": "The type of detection event."
         },
-        "riskScore": {
-          "type": "number",
-          "description": "The calculated risk score for this event (0-100)."
+        "result": {
+          "type": "string",
+          "description": "The outcome of the detection (e.g., 'Malicious', 'Normal Driving')."
         },
-        "nodes": {
-          "type": "array",
-          "description": "A list of nodes involved in the detection.",
-          "items": {
-            "type": "object",
-            "properties": {
-              "vehicleId": {
-                "type": "string"
-              },
-              "confidence": {
-                "type": "string"
-              }
-            }
-          }
+        "confidence": {
+          "type": "number",
+          "description": "The confidence score of the prediction (0-100)."
+        },
+        "details": {
+          "type": "string",
+          "description": "Additional details about the event."
         }
       },
       "required": [
         "detectedAt",
-        "sybilNodeCount",
-        "riskScore",
-        "nodes"
+        "type",
+        "result",
+        "confidence",
+        "details"
       ]
     }
   },
@@ -158,17 +156,17 @@
         }
       },
       {
-        "path": "/sybil_attacks/{sybilAttackId}",
+        "path": "/detection_logs/{logId}",
         "definition": {
-          "entityName": "SybilAttack",
+          "entityName": "DetectionLog",
           "schema": {
-            "$ref": "#/backend/entities/SybilAttack"
+            "$ref": "#/backend/entities/DetectionLog"
           },
-          "description": "Stores logs of Sybil attack detection events.",
+          "description": "Stores logs of all threat detection events.",
           "params": [
             {
-              "name": "sybilAttackId",
-              "description": "Unique identifier for the sybil attack log."
+              "name": "logId",
+              "description": "Unique identifier for the detection log."
             }
           ]
         }

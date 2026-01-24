@@ -24,7 +24,7 @@ import SpoofingCard from "../sybil-detection/spoofing";
 import SensorSpoofingCard from "../sybil-detection/sensor_spoofing";
 import { useMaliciousCount } from '../context/malicious-count-context';
 import { useFirestore } from '@/firebase';
-import { addSybilAttackLog } from '@/firebase/firestore/sybil-attacks';
+import { addDetectionLog } from '@/firebase/firestore/detection-logs';
 
 
 /* ---------------- SCHEMA ---------------- */
@@ -88,10 +88,11 @@ export default function SybilDetectionPage() {
       setMaliciousCount(prevCount => prevCount + 1);
     }
 
-    addSybilAttackLog(firestore, {
-      sybilNodeCount: isMalicious ? 1 : 0,
-      riskScore: confidence * 100,
-      nodes: [{ vehicleId: 'CSV/Manual', confidence: `${(confidence * 100).toFixed(0)}%` }]
+    addDetectionLog(firestore, {
+      type: 'Sybil',
+      result: isMalicious ? 'Malicious' : 'Benign',
+      confidence: confidence * 100,
+      details: `Nodes: CSV/Manual, Confidence: ${(confidence * 100).toFixed(0)}%`,
     });
 
     toast({
