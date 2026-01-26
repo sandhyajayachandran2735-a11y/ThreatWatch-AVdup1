@@ -24,8 +24,8 @@ import { useToast } from '@/hooks/use-toast';
 import SpoofingCard from "../sybil-detection/spoofing";
 import SensorSpoofingCard from "../sybil-detection/sensor_spoofing";
 import { useMaliciousCount } from '../context/malicious-count-context';
-import { useFirestore } from '@/firebase';
-import { addDetectionLog } from '@/firebase/firestore/detection-logs';
+// import { useFirestore } from '@/firebase';
+// import { addDetectionLog } from '@/firebase/firestore/detection-logs';
 
 
 /* ---------------- SCHEMA ---------------- */
@@ -62,7 +62,7 @@ const sampleData = {
 export default function SybilDetectionPage() {
   const { toast } = useToast();
   const { maliciousCount, setMaliciousCount } = useMaliciousCount();
-  const firestore = useFirestore();
+  // const firestore = useFirestore();
 
 
   const [isLoading, setIsLoading] = useState(false);
@@ -96,12 +96,12 @@ export default function SybilDetectionPage() {
       setMaliciousCount(prevCount => prevCount + 1);
     }
 
-    addDetectionLog(firestore, {
-      type: 'Sybil',
-      result: isMalicious ? 'Malicious' : 'Benign',
-      confidence: confidence * 100,
-      details: `Nodes: CSV/Manual, Confidence: ${(confidence * 100).toFixed(0)}%`,
-    });
+    // addDetectionLog(firestore, {
+    //   type: 'Sybil',
+    //   result: isMalicious ? 'Malicious' : 'Benign',
+    //   confidence: confidence * 100,
+    //   details: `Nodes: CSV/Manual, Confidence: ${(confidence * 100).toFixed(0)}%`,
+    // });
 
     toast({
       title: 'Prediction successful',

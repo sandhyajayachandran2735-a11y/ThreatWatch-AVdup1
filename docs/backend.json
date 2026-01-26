@@ -75,46 +75,7 @@
         "riskScore"
       ]
     },
-    "DetectionLog": {
-      "title": "DetectionLog",
-      "type": "object",
-      "description": "Represents a log of a threat detection event.",
-      "properties": {
-        "detectedAt": {
-          "type": "string",
-          "format": "date-time",
-          "description": "The timestamp when the detection occurred."
-        },
-        "type": {
-          "type": "string",
-          "enum": [
-            "Sybil",
-            "Sensor Spoofing"
-          ],
-          "description": "The type of detection event."
-        },
-        "result": {
-          "type": "string",
-          "description": "The outcome of the detection (e.g., 'Malicious', 'Normal Driving')."
-        },
-        "confidence": {
-          "type": "number",
-          "description": "The confidence score of the prediction (0-100)."
-        },
-        "details": {
-          "type": "string",
-          "description": "Additional details about the event."
-        }
-      },
-      "required": [
-        "detectedAt",
-        "type",
-        "result",
-        "confidence",
-        "details"
-      ]
-    }
-  },
+
   "auth": {
     "providers": [
       "password",
@@ -174,4 +135,6 @@
     ],
     "reasoning": "The Firestore data structure is designed to support the Autonomous Vehicle Threat Detection System, focusing on Sybil attack detection, GPS spoofing, and sensor anomalies. The structure prioritizes authorization independence by avoiding hierarchical authorization dependencies, ensuring that security rules are clear, debuggable, and do not rely on `get()` calls. This is achieved by denormalizing data where necessary to avoid dependency on parent documents for authorization.  \n\nAuthorization Independence: Since all data is collected and processed without user-specific ownership, the structure doesn't rely on user-based authorization. Instead, access is controlled at the collection level, and data can be read or written by authorized services or functions.  \n\nQAPs Support: The segregation of data into collections based on their purpose (VehicleCommunicationLogs, SybilDetectionResults) supports secure list operations (QAPs). Since no user-specific data is mixed with global detection results, listing data is straightforward and doesn't require complex filtering logic in the security rules. Specifically, the lack of user-specific data means that list operations are always performed at the collection level with consistent security requirements.\n\nGlobal roles are not explicitly defined as there are no user specific permissions required, it is assumed the backend has blanket permissions to manage the data."
   }
-}
+}}
+
+

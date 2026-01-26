@@ -19,8 +19,8 @@ import { AlertCircle, CheckCircle, Loader2, ShieldQuestion, UploadCloud } from '
 import { Gauge } from '@/components/gauge';
 import { useToast } from '@/hooks/use-toast';
 import * as z from 'zod';
-import { useFirestore } from '@/firebase';
-import { addDetectionLog } from '@/firebase/firestore/detection-logs';
+// import { useFirestore } from '@/firebase';
+// import { addDetectionLog } from '@/firebase/firestore/detection-logs';
 
 // Define the schema for the new input format
 const SensorSpoofingInputSchema = z.object({
@@ -48,7 +48,7 @@ export default function SensorSpoofingPage() {
   const [error, setError] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const { toast } = useToast();
-  const firestore = useFirestore();
+  // const firestore = useFirestore();
 
   const { control, handleSubmit, reset } = useForm<SensorSpoofingInput>({
     resolver: zodResolver(SensorSpoofingInputSchema),
@@ -63,12 +63,12 @@ export default function SensorSpoofingPage() {
             confidence: confidence,
         });
 
-        addDetectionLog(firestore, {
-            type: 'Sensor Spoofing',
-            result: result.action,
-            confidence: confidence * 100,
-            details: `Used features: ${result.used_features?.join(', ') || 'N/A'}`
-        });
+        // addDetectionLog(firestore, {
+        //     type: 'Sensor Spoofing',
+        //     result: result.action,
+        //     confidence: confidence * 100,
+        //     details: `Used features: ${result.used_features?.join(', ') || 'N/A'}`
+        // });
 
         toast({
             title: 'Analysis Complete',
