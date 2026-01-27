@@ -5,6 +5,7 @@ import {
 } from '@/ai/flows/summarize-vehicle-threats';
 import {
     type SummarizeVehicleThreatsInput,
+    SummarizeVehicleThreatsInputSchema,
 } from '@/ai/schemas/summarize-vehicle-threats-schemas'
 import {
   detectSybilAttack,
@@ -40,15 +41,10 @@ import {
 } from '@/ai/schemas/detect-sensor-anomaly-schemas';
 
 
-const AISummarySchema = z.object({
-  sybilAlertsToday: z.coerce.number(),
-  additionalContext: z.string().optional(),
-});
-
 export async function getAISummary(
   input: SummarizeVehicleThreatsInput
 ): Promise<{ summary?: string; error?: string }> {
-  const parsed = AISummarySchema.safeParse(input);
+  const parsed = SummarizeVehicleThreatsInputSchema.safeParse(input);
 
   if (!parsed.success) {
     return { error: 'Invalid input.' };
