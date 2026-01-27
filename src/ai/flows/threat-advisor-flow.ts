@@ -37,8 +37,6 @@ CONVERSATION HISTORY:
 {{/each}}
 
 Based on the history and context, answer the user's latest message.
-
-User: {{history.[history.length - 1].content}}
 `,
 });
 
