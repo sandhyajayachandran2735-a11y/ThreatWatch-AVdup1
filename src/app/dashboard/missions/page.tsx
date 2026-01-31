@@ -31,7 +31,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { PlusCircle, Trash2, ShieldAlert, Radar, FileText, Upload } from 'lucide-react';
+import { PlusCircle, Trash2, ShieldAlert, Radar, FileText, Upload, FileCode } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
@@ -43,7 +43,7 @@ interface Mission {
 
 const initialSybilMissions: Mission[] = [
   { id: 1, title: 'Bangalore', files: ['comm_log_001.csv', 'node_analysis_v1.pdf'] },
-  { id: 2, title: 'Chennai', files: [' चेन्नई_traffic_data.json'] },
+  { id: 2, title: 'Chennai', files: ['चेन्नई_traffic_data.json'] },
   { id: 3, title: 'Mumbai', files: [] },
 ];
 
@@ -63,7 +63,6 @@ export default function MissionsPage() {
   const [newMissionTitle, setNewMissionTitle] = useState('');
   
   const [viewingMission, setViewingMission] = useState<Mission | null>(null);
-  const [newFileName, setNewFileName] = useState('');
 
   const openAddDialog = (type: 'sybil' | 'sensor') => {
     setTargetType(type);
@@ -107,12 +106,13 @@ export default function MissionsPage() {
     setStorageDialogOpen(true);
   };
 
-  const handleAddFile = () => {
-    if (!newFileName || !viewingMission) return;
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !viewingMission) return;
     
     const updatedMission = {
       ...viewingMission,
-      files: [...viewingMission.files, newFileName],
+      files: [...viewingMission.files, file.name],
     };
 
     if (targetType === 'sybil') {
@@ -122,7 +122,7 @@ export default function MissionsPage() {
     }
 
     setViewingMission(updatedMission);
-    setNewFileName('');
+    e.target.value = ''; // Reset input
   };
 
   const handleDeleteFile = (fileName: string) => {
@@ -147,7 +147,7 @@ export default function MissionsPage() {
       {missions.map((mission) => (
         <Card 
           key={mission.id} 
-          className="cursor-pointer transition-shadow hover:shadow-md group relative"
+          className="cursor-pointer transition-shadow hover:shadow-md group relative overflow-hidden"
           onClick={() => openStorage(mission, type)}
         >
           <CardHeader className="flex flex-row items-start justify-between">
@@ -188,19 +188,19 @@ export default function MissionsPage() {
                   alt="Map thumbnail"
                   width={400}
                   height={200}
-                  className="h-full w-full object-cover"
+                  className="h-full w-full object-cover transition-transform group-hover:scale-105"
                   data-ai-hint={mapThumbnail.imageHint}
                 />
               </div>
             )}
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <FileText className="h-4 w-4" />
-              <span>{mission.files.length} files stored</span>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <FileText className="h-4 w-4" />
+                <span>{mission.files.length} files stored</span>
+              </div>
+              <Button variant="outline" size="sm" className="h-8">View Storage</Button>
             </div>
           </CardContent>
-          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-background/20 backdrop-blur-[1px] rounded-lg pointer-events-none">
-             <Button variant="secondary" size="sm" className="shadow-lg">View Storage</Button>
-          </div>
         </Card>
       ))}
       {missions.length === 0 && (
@@ -216,7 +216,7 @@ export default function MissionsPage() {
       <div>
         <h1 className="text-3xl font-semibold font-headline">Missions & Storage</h1>
         <p className="text-muted-foreground">
-          Manage location-based data and analysis logs for threat detection. Click a card to view files.
+          Manage location-based data and analysis logs for threat detection. Use "View Storage" to manage files for each mission.
         </p>
       </div>
 
@@ -279,63 +279,84 @@ export default function MissionsPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Dialog for Mission File Storage */}
+      {/* Dialog for Mission File Storage (View Mission Details) */}
       <Dialog open={storageDialogOpen} onOpenChange={setStorageDialogOpen}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <FileText className="h-5 w-5" />
-              {viewingMission?.title} Storage
+              <FileCode className="h-5 w-5 text-primary" />
+              {viewingMission?.title} - Mission Data Storage
             </DialogTitle>
             <DialogDescription>
-              Manage all data files and logs for this location.
+              Upload and manage CSV logs or other data files for this specific location.
             </DialogDescription>
           </DialogHeader>
           
-          <div className="space-y-4 py-4">
-            <div className="flex gap-2">
-              <Input 
-                placeholder="New file name (e.g. data_dump.csv)" 
-                value={newFileName}
-                onChange={(e) => setNewFileName(e.target.value)}
-              />
-              <Button size="icon" onClick={handleAddFile} disabled={!newFileName}>
+          <div className="space-y-6 py-4">
+            <div className="flex flex-col items-center justify-center border-2 border-dashed rounded-lg p-6 bg-muted/30">
+              <Upload className="h-8 w-8 text-muted-foreground mb-2" />
+              <p className="text-sm text-center mb-4 text-muted-foreground">
+                Upload CSV or communication log files
+              </p>
+              <Label 
+                htmlFor="mission-file-upload" 
+                className="cursor-pointer bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 rounded-md text-sm transition-colors flex items-center gap-2"
+              >
                 <Upload className="h-4 w-4" />
-              </Button>
+                Upload CSV File
+              </Label>
+              <Input 
+                id="mission-file-upload" 
+                type="file" 
+                className="sr-only" 
+                accept=".csv,.json,.log" 
+                onChange={handleFileUpload}
+              />
             </div>
             
-            <Separator />
-            
-            <ScrollArea className="h-[250px] pr-4">
-              <div className="space-y-2">
-                {viewingMission?.files.length === 0 ? (
-                  <p className="text-center text-sm text-muted-foreground py-8">
-                    No files uploaded yet.
-                  </p>
-                ) : (
-                  viewingMission?.files.map((file, idx) => (
-                    <div key={idx} className="flex items-center justify-between p-2 rounded-md bg-muted/50 border group">
-                      <div className="flex items-center gap-3">
-                        <FileText className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm font-medium">{file}</span>
+            <div className="space-y-3">
+              <h3 className="text-sm font-semibold flex items-center gap-2">
+                <FileText className="h-4 w-4" />
+                Stored Files ({viewingMission?.files.length || 0})
+              </h3>
+              <Separator />
+              
+              <ScrollArea className="h-[200px] pr-4">
+                <div className="space-y-2">
+                  {viewingMission?.files.length === 0 ? (
+                    <p className="text-center text-sm text-muted-foreground py-8">
+                      No files stored for this mission yet.
+                    </p>
+                  ) : (
+                    viewingMission?.files.map((file, idx) => (
+                      <div key={idx} className="flex items-center justify-between p-3 rounded-md bg-muted/50 border group">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-background rounded-md border">
+                            <FileText className="h-4 w-4 text-primary" />
+                          </div>
+                          <div className="flex flex-col">
+                            <span className="text-sm font-medium">{file}</span>
+                            <span className="text-xs text-muted-foreground">Stored Log</span>
+                          </div>
+                        </div>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-8 w-8 opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive"
+                          onClick={() => handleDeleteFile(file)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </div>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="h-8 w-8 opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive"
-                        onClick={() => handleDeleteFile(file)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ))
-                )}
-              </div>
-            </ScrollArea>
+                    ))
+                  )}
+                </div>
+              </ScrollArea>
+            </div>
           </div>
           
           <DialogFooter>
-            <Button variant="outline" onClick={() => setStorageDialogOpen(false)}>Close</Button>
+            <Button variant="outline" onClick={() => setStorageDialogOpen(false)}>Close Storage</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
