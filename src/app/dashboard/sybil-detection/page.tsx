@@ -1,7 +1,6 @@
-
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -22,13 +21,8 @@ import { AlertCircle, CheckCircle, Loader2, UploadCloud } from 'lucide-react';
 import { Gauge } from '@/components/gauge';
 import { useToast } from '@/hooks/use-toast';
 import SpoofingCard from "../sybil-detection/spoofing";
-import SensorSpoofingCard from "../sybil-detection/sensor_spoofing";
 import { useMaliciousCount } from '../context/malicious-count-context';
-// import { useFirestore } from '@/firebase';
-// import { addDetectionLog } from '@/firebase/firestore/detection-logs';
-
-
-/* ---------------- SCHEMA ---------------- */
+import { useAnalysis } from '../context/analysis-context';
 
 const DetectSybilAttackInputSchema = z.object({
   x: z.number(),
@@ -39,14 +33,11 @@ const DetectSybilAttackInputSchema = z.object({
 
 type DetectSybilAttackInput = z.infer<typeof DetectSybilAttackInputSchema>;
 
-// Define the type for the backend response
 type SybilPredictionResult = {
   prediction: 0 | 1;
   confidence: number;
   used_features?: string[];
 };
-
-/* ---------------- SAMPLE DATA ---------------- */
 
 const sampleData = {
   a: {
@@ -57,13 +48,10 @@ const sampleData = {
   },
 };
 
-/* ---------------- COMPONENT ---------------- */
-
 export default function SybilDetectionPage() {
   const { toast } = useToast();
   const { maliciousCount, setMaliciousCount } = useMaliciousCount();
-  // const firestore = useFirestore();
-
+  const { activeFile, activeType, clearAnalysis } = useAnalysis();
 
   const [isLoading, setIsLoading] = useState(false);
   const [prediction, setPrediction] = useState<{
@@ -74,12 +62,10 @@ export default function SybilDetectionPage() {
   const [error, setError] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
 
-  const { control, handleSubmit, reset } = useForm<DetectSybilAttackInput>({
+  const { control, handleSubmit } = useForm<DetectSybilAttackInput>({
     resolver: zodResolver(DetectSybilAttackInputSchema),
-    // defaultValues: sampleData.a,
   });
 
-  /* ---------------- COMMON PREDICTION HANDLER ---------------- */
   const handlePredictionResult = (result: SybilPredictionResult) => {
     const isMalicious = result.prediction === 1;
     const confidence = result.confidence ?? 0.5;
@@ -96,21 +82,12 @@ export default function SybilDetectionPage() {
       setMaliciousCount(prevCount => prevCount + 1);
     }
 
-    // addDetectionLog(firestore, {
-    //   type: 'Sybil',
-    //   result: isMalicious ? 'Malicious' : 'Benign',
-    //   confidence: confidence * 100,
-    //   details: `Nodes: CSV/Manual, Confidence: ${(confidence * 100).toFixed(0)}%`,
-    // });
-
     toast({
-      title: 'Prediction successful',
+      title: 'Analysis complete',
       description: isMalicious ? 'Malicious activity detected!' : 'Behavior appears benign.',
       variant: isMalicious ? 'destructive' : 'default',
     });
   };
-
-  /* ---------------- MANUAL PREDICTION ---------------- */
 
   const handleRunDetection = async (data: DetectSybilAttackInput) => {
     setIsLoading(true);
@@ -139,22 +116,17 @@ export default function SybilDetectionPage() {
           variant: 'destructive'
       })
     }
-
     setIsLoading(false);
   };
 
-  /* ---------------- CSV UPLOAD ---------------- */
-
-  const handleCsvUpload = async () => {
-    if (!file) return;
-
+  const runCsvPrediction = async (fileToUse: File) => {
     setIsLoading(true);
     setError(null);
     setPrediction(null);
 
     try {
       const formData = new FormData();
-      formData.append('file', file);
+      formData.append('file', fileToUse);
 
       const response = await fetch('https://sybil-backend.onrender.com/predict-csv', {
         method: 'POST',
@@ -175,17 +147,24 @@ export default function SybilDetectionPage() {
           variant: 'destructive'
       })
     }
-
     setIsLoading(false);
   };
 
-  /* ---------------- UI ---------------- */
+  const handleCsvUpload = async () => {
+    if (!file) return;
+    runCsvPrediction(file);
+  };
+
+  useEffect(() => {
+    if (activeFile && activeType === 'sybil') {
+      runCsvPrediction(activeFile);
+      clearAnalysis();
+    }
+  }, [activeFile, activeType, clearAnalysis]);
 
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-      {/* LEFT COLUMN */}
       <div className="flex flex-col gap-6">
-        {/* CSV CARD */}
         <Card>
           <CardHeader>
             <CardTitle>Upload CSV</CardTitle>
@@ -215,7 +194,6 @@ export default function SybilDetectionPage() {
           </CardFooter>
         </Card>
 
-        {/* MANUAL CARD */}
         <Card>
           <CardHeader>
             <CardTitle>Manual Input</CardTitle>
@@ -255,7 +233,6 @@ export default function SybilDetectionPage() {
         <SpoofingCard />
       </div>
 
-      {/* RIGHT COLUMN */}
       <div className="flex flex-col gap-6">
         <Card>
           <CardHeader>
@@ -295,7 +272,6 @@ export default function SybilDetectionPage() {
             )}
           </CardContent>
         </Card>
-        {/* <SensorSpoofingCard /> */}
       </div>
     </div>
   );

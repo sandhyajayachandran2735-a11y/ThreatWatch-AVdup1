@@ -132,8 +132,6 @@ const threatAdvisorFlow = ai.defineFlow(
     outputSchema: AskThreatAdvisorOutputSchema,
   },
   async (input) => {
-    // For simple, direct conversations, we can just use the latest user message.
-    // The prompt is already configured to see the whole history.
     const { output } = await prompt(input);
     return output!;
   }

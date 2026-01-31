@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import {
   Card,
   CardContent,
@@ -14,7 +15,6 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
@@ -31,26 +31,34 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { PlusCircle, Trash2, MapPin, Radar, FileText, Upload } from 'lucide-react';
+import { PlusCircle, Trash2, MapPin, Radar, FileText, Upload, PlayCircle } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
+import { useAnalysis } from '../context/analysis-context';
+
+interface MissionFile {
+  name: string;
+  data: File | null;
+}
 
 interface Mission {
   id: number;
   title: string;
-  files: string[];
+  files: MissionFile[];
 }
 
 const initialSybilMissions: Mission[] = [
-  { id: 1, title: 'Los Angeles', files: ['comm_log_la_01.csv'] },
-  { id: 2, title: 'San Francisco', files: ['sf_traffic_data.json'] },
+  { id: 1, title: 'Los Angeles', files: [{ name: 'comm_log_la_01.csv', data: null }] },
+  { id: 2, title: 'San Francisco', files: [{ name: 'sf_traffic_data.csv', data: null }] },
 ];
 
 const initialSensorMissions: Mission[] = [
-  { id: 101, title: 'New York Central', files: ['sensor_ny_stream.log'] },
+  { id: 101, title: 'New York Central', files: [{ name: 'sensor_ny_stream.csv', data: null }] },
 ];
 
 export default function MissionsPage() {
+  const router = useRouter();
+  const { setAnalysis } = useAnalysis();
   const mapThumbnail = PlaceHolderImages.find((p) => p.id === 'mission-map-thumbnail');
   
   const [sybilMissions, setSybilMissions] = useState<Mission[]>(initialSybilMissions);
@@ -111,7 +119,7 @@ export default function MissionsPage() {
     
     const updatedMission = {
       ...viewingMission,
-      files: [...viewingMission.files, file.name],
+      files: [...viewingMission.files, { name: file.name, data: file }],
     };
 
     if (targetType === 'sybil') {
@@ -121,7 +129,7 @@ export default function MissionsPage() {
     }
 
     setViewingMission(updatedMission);
-    e.target.value = ''; // Reset input
+    e.target.value = ''; 
   };
 
   const handleDeleteFile = (fileName: string) => {
@@ -129,7 +137,7 @@ export default function MissionsPage() {
     
     const updatedMission = {
       ...viewingMission,
-      files: viewingMission.files.filter(f => f !== fileName),
+      files: viewingMission.files.filter(f => f.name !== fileName),
     };
 
     if (targetType === 'sybil') {
@@ -139,6 +147,16 @@ export default function MissionsPage() {
     }
 
     setViewingMission(updatedMission);
+  };
+
+  const handleAnalyze = (fileObj: MissionFile) => {
+    let fileToAnalyze = fileObj.data;
+    if (!fileToAnalyze) {
+      // Create a dummy CSV for the initial files so prediction flow can be tested
+      fileToAnalyze = new File(["x,y,speed,acceleration\n156.0,869.6,14.2,-0.1"], fileObj.name, { type: 'text/csv' });
+    }
+    setAnalysis(fileToAnalyze, targetType);
+    router.push(`/dashboard/${targetType === 'sybil' ? 'sybil-detection' : 'sensor-spoofing'}`);
   };
 
   const MissionList = ({ missions, type }: { missions: Mission[]; type: 'sybil' | 'sensor' }) => (
@@ -149,7 +167,7 @@ export default function MissionsPage() {
           className="group relative overflow-hidden transition-all hover:shadow-lg border-2"
         >
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-xl font-bold text-foreground/90">{mission.title}</CardTitle>
+            <CardTitle className="text-xl font-bold text-[#1a2b4b]">{mission.title}</CardTitle>
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button 
@@ -164,7 +182,7 @@ export default function MissionsPage() {
                 <AlertDialogHeader>
                   <AlertDialogTitle>Delete Mission?</AlertDialogTitle>
                   <AlertDialogDescription>
-                    This will permanently delete <span className="font-semibold">{mission.title}</span> and all {mission.files.length} associated files.
+                    This will permanently delete <span className="font-semibold">{mission.title}</span> and all associated files.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
@@ -189,7 +207,7 @@ export default function MissionsPage() {
               </div>
             )}
             <Button 
-              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold h-11" 
+              className="w-full bg-primary hover:bg-primary/90 text-white font-semibold h-11" 
               onClick={() => openStorage(mission, type)}
             >
               View Mission
@@ -256,7 +274,6 @@ export default function MissionsPage() {
         <MissionList missions={sensorMissions} type="sensor" />
       </section>
 
-      {/* Dialog for Adding Missions */}
       <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
@@ -277,13 +294,12 @@ export default function MissionsPage() {
               />
             </div>
           </div>
-          <DialogFooter>
+          <div className="flex justify-end pt-4">
             <Button onClick={handleAddMission} className="w-full h-11">Create Entry</Button>
-          </DialogFooter>
+          </div>
         </DialogContent>
       </Dialog>
 
-      {/* Dialog for Mission Data Storage */}
       <Dialog open={storageDialogOpen} onOpenChange={setStorageDialogOpen}>
         <DialogContent className="sm:max-w-[650px] p-0 overflow-hidden">
           <div className="p-8 space-y-6">
@@ -309,25 +325,36 @@ export default function MissionsPage() {
                 ) : (
                   <ScrollArea className="w-full max-h-[400px] px-6 py-4">
                     <div className="space-y-3">
-                      {viewingMission?.files.map((file, idx) => (
+                      {viewingMission?.files.map((fileObj, idx) => (
                         <div key={idx} className="flex items-center justify-between p-4 rounded-xl bg-muted/30 border group hover:border-primary/30 transition-all">
                           <div className="flex items-center gap-4">
                             <div className="p-2.5 bg-background rounded-lg border shadow-sm">
                               <FileText className="h-5 w-5 text-primary" />
                             </div>
                             <div className="flex flex-col">
-                              <span className="text-sm font-bold truncate max-w-[250px]">{file}</span>
+                              <span className="text-sm font-bold truncate max-w-[180px]">{fileObj.name}</span>
                               <span className="text-xs text-muted-foreground">Communication Log</span>
                             </div>
                           </div>
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            className="h-9 w-9 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-                            onClick={() => handleDeleteFile(file)}
-                          >
-                            <Trash2 className="h-5 w-5" />
-                          </Button>
+                          <div className="flex items-center gap-2">
+                            <Button 
+                              variant="secondary"
+                              size="sm"
+                              className="bg-primary/10 text-primary hover:bg-primary/20 font-bold"
+                              onClick={() => handleAnalyze(fileObj)}
+                            >
+                              <PlayCircle className="mr-2 h-4 w-4" />
+                              Analyze
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="h-9 w-9 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                              onClick={() => handleDeleteFile(fileObj.name)}
+                            >
+                              <Trash2 className="h-5 w-5" />
+                            </Button>
+                          </div>
                         </div>
                       ))}
                     </div>

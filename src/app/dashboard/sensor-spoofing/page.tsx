@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
@@ -19,10 +19,8 @@ import { AlertCircle, CheckCircle, Loader2, ShieldQuestion, UploadCloud } from '
 import { Gauge } from '@/components/gauge';
 import { useToast } from '@/hooks/use-toast';
 import * as z from 'zod';
-// import { useFirestore } from '@/firebase';
-// import { addDetectionLog } from '@/firebase/firestore/detection-logs';
+import { useAnalysis } from '../context/analysis-context';
 
-// Define the schema for the new input format
 const SensorSpoofingInputSchema = z.object({
   speed_kmh: z.number(),
   acceleration_mps2: z.number(),
@@ -41,16 +39,15 @@ const defaultValues: SensorSpoofingInput = {
     traffic_density: 41,
 };
 
-
 export default function SensorSpoofingPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [prediction, setPrediction] = useState<{ action: string, confidence: number } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const { toast } = useToast();
-  // const firestore = useFirestore();
+  const { activeFile, activeType, clearAnalysis } = useAnalysis();
 
-  const { control, handleSubmit, reset } = useForm<SensorSpoofingInput>({
+  const { control, handleSubmit } = useForm<SensorSpoofingInput>({
     resolver: zodResolver(SensorSpoofingInputSchema),
     defaultValues: defaultValues,
   });
@@ -62,13 +59,6 @@ export default function SensorSpoofingPage() {
             action: result.action,
             confidence: confidence,
         });
-
-        // addDetectionLog(firestore, {
-        //     type: 'Sensor Spoofing',
-        //     result: result.action,
-        //     confidence: confidence * 100,
-        //     details: `Used features: ${result.used_features?.join(', ') || 'N/A'}`
-        // });
 
         toast({
             title: 'Analysis Complete',
@@ -89,7 +79,7 @@ export default function SensorSpoofingPage() {
       const response = await fetch(url, {
         method: 'POST',
         body: body,
-          mode: 'cors',
+        mode: 'cors',
         headers: body instanceof FormData ? undefined : { 'Content-Type': 'application/json' },
       });
 
@@ -112,18 +102,27 @@ export default function SensorSpoofingPage() {
     setIsLoading(false);
   };
 
-
   const handleRunDetection = async (data: SensorSpoofingInput) => {
     runPrediction('https://sybil-backend.onrender.com/predict-sensor-json', JSON.stringify({ features: Object.values(data) }));
   };
 
-  const handleCsvUpload = async () => {
-    if (!file) return;
+  const runCsvPrediction = async (fileToUse: File) => {
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append('file', fileToUse);
     runPrediction('https://sybil-backend.onrender.com/predict-sensor-csv', formData);
   };
 
+  const handleCsvUpload = async () => {
+    if (!file) return;
+    runCsvPrediction(file);
+  };
+
+  useEffect(() => {
+    if (activeFile && activeType === 'sensor') {
+      runCsvPrediction(activeFile);
+      clearAnalysis();
+    }
+  }, [activeFile, activeType, clearAnalysis]);
 
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
