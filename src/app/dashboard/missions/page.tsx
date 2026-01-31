@@ -31,23 +31,25 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { PlusCircle, Trash2, ShieldAlert, Radar } from 'lucide-react';
+import { PlusCircle, Trash2, ShieldAlert, Radar, FileText, Upload } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
-
-const initialSybilMissions = [
-  { id: 1, title: 'Bangalore' },
-  { id: 2, title: 'Chennai' },
-  { id: 3, title: 'Mumbai' },
-];
-
-const initialSensorMissions = [
-  { id: 101, title: 'Delhi Route Alpha' },
-];
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface Mission {
   id: number;
   title: string;
+  files: string[];
 }
+
+const initialSybilMissions: Mission[] = [
+  { id: 1, title: 'Bangalore', files: ['comm_log_001.csv', 'node_analysis_v1.pdf'] },
+  { id: 2, title: 'Chennai', files: [' चेन्नई_traffic_data.json'] },
+  { id: 3, title: 'Mumbai', files: [] },
+];
+
+const initialSensorMissions: Mission[] = [
+  { id: 101, title: 'Delhi Route Alpha', files: ['sensor_stream_dump.log'] },
+];
 
 export default function MissionsPage() {
   const mapThumbnail = PlaceHolderImages.find((p) => p.id === 'mission-map-thumbnail');
@@ -55,13 +57,17 @@ export default function MissionsPage() {
   const [sybilMissions, setSybilMissions] = useState<Mission[]>(initialSybilMissions);
   const [sensorMissions, setSensorMissions] = useState<Mission[]>(initialSensorMissions);
   
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const [storageDialogOpen, setStorageDialogOpen] = useState(false);
   const [targetType, setTargetType] = useState<'sybil' | 'sensor'>('sybil');
   const [newMissionTitle, setNewMissionTitle] = useState('');
+  
+  const [viewingMission, setViewingMission] = useState<Mission | null>(null);
+  const [newFileName, setNewFileName] = useState('');
 
   const openAddDialog = (type: 'sybil' | 'sensor') => {
     setTargetType(type);
-    setDialogOpen(true);
+    setAddDialogOpen(true);
   };
 
   const handleAddMission = () => {
@@ -73,6 +79,7 @@ export default function MissionsPage() {
     const newMission: Mission = {
       id: newId,
       title: newMissionTitle,
+      files: [],
     };
 
     if (targetType === 'sybil') {
@@ -82,7 +89,7 @@ export default function MissionsPage() {
     }
 
     setNewMissionTitle('');
-    setDialogOpen(false);
+    setAddDialogOpen(false);
   };
 
   const handleDeleteMission = (missionId: number, type: 'sybil' | 'sensor') => {
@@ -91,26 +98,77 @@ export default function MissionsPage() {
     } else {
       setSensorMissions(sensorMissions.filter((m) => m.id !== missionId));
     }
+    if (viewingMission?.id === missionId) setViewingMission(null);
+  };
+
+  const openStorage = (mission: Mission, type: 'sybil' | 'sensor') => {
+    setViewingMission(mission);
+    setTargetType(type);
+    setStorageDialogOpen(true);
+  };
+
+  const handleAddFile = () => {
+    if (!newFileName || !viewingMission) return;
+    
+    const updatedMission = {
+      ...viewingMission,
+      files: [...viewingMission.files, newFileName],
+    };
+
+    if (targetType === 'sybil') {
+      setSybilMissions(sybilMissions.map(m => m.id === viewingMission.id ? updatedMission : m));
+    } else {
+      setSensorMissions(sensorMissions.map(m => m.id === viewingMission.id ? updatedMission : m));
+    }
+
+    setViewingMission(updatedMission);
+    setNewFileName('');
+  };
+
+  const handleDeleteFile = (fileName: string) => {
+    if (!viewingMission) return;
+    
+    const updatedMission = {
+      ...viewingMission,
+      files: viewingMission.files.filter(f => f !== fileName),
+    };
+
+    if (targetType === 'sybil') {
+      setSybilMissions(sybilMissions.map(m => m.id === viewingMission.id ? updatedMission : m));
+    } else {
+      setSensorMissions(sensorMissions.map(m => m.id === viewingMission.id ? updatedMission : m));
+    }
+
+    setViewingMission(updatedMission);
   };
 
   const MissionList = ({ missions, type }: { missions: Mission[]; type: 'sybil' | 'sensor' }) => (
     <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
       {missions.map((mission) => (
-        <Card key={mission.id}>
+        <Card 
+          key={mission.id} 
+          className="cursor-pointer transition-shadow hover:shadow-md group relative"
+          onClick={() => openStorage(mission, type)}
+        >
           <CardHeader className="flex flex-row items-start justify-between">
             <CardTitle className="text-lg font-semibold">{mission.title}</CardTitle>
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive">
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-7 w-7 text-muted-foreground hover:text-destructive"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <Trash2 className="h-4 w-4" />
                 </Button>
               </AlertDialogTrigger>
-              <AlertDialogContent>
+              <AlertDialogContent onClick={(e) => e.stopPropagation()}>
                 <AlertDialogHeader>
                   <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                   <AlertDialogDescription>
                     This action cannot be undone. This will permanently delete the mission
-                    <span className="font-semibold"> {mission.title}</span>.
+                    <span className="font-semibold"> {mission.title}</span> and all its stored files.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
@@ -122,7 +180,7 @@ export default function MissionsPage() {
               </AlertDialogContent>
             </AlertDialog>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-4">
             {mapThumbnail && (
               <div className="aspect-video overflow-hidden rounded-md">
                 <Image
@@ -135,7 +193,14 @@ export default function MissionsPage() {
                 />
               </div>
             )}
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <FileText className="h-4 w-4" />
+              <span>{mission.files.length} files stored</span>
+            </div>
           </CardContent>
+          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-background/20 backdrop-blur-[1px] rounded-lg pointer-events-none">
+             <Button variant="secondary" size="sm" className="shadow-lg">View Storage</Button>
+          </div>
         </Card>
       ))}
       {missions.length === 0 && (
@@ -148,15 +213,13 @@ export default function MissionsPage() {
 
   return (
     <div className="space-y-12">
-      {/* Page Header */}
       <div>
         <h1 className="text-3xl font-semibold font-headline">Missions & Storage</h1>
         <p className="text-muted-foreground">
-          Manage location-based data and analysis logs for threat detection.
+          Manage location-based data and analysis logs for threat detection. Click a card to view files.
         </p>
       </div>
 
-      {/* Sybil Attack Section */}
       <section className="space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -172,7 +235,6 @@ export default function MissionsPage() {
         <MissionList missions={sybilMissions} type="sybil" />
       </section>
 
-      {/* Sensor Spoofing Section */}
       <section className="space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -188,8 +250,8 @@ export default function MissionsPage() {
         <MissionList missions={sensorMissions} type="sensor" />
       </section>
 
-      {/* Shared Dialog for Adding Missions */}
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+      {/* Dialog for Adding Missions */}
+      <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Add New {targetType === 'sybil' ? 'Sybil' : 'Sensor'} Mission</DialogTitle>
@@ -213,6 +275,67 @@ export default function MissionsPage() {
           </div>
           <DialogFooter>
             <Button onClick={handleAddMission}>Create Entry</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog for Mission File Storage */}
+      <Dialog open={storageDialogOpen} onOpenChange={setStorageDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5" />
+              {viewingMission?.title} Storage
+            </DialogTitle>
+            <DialogDescription>
+              Manage all data files and logs for this location.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="flex gap-2">
+              <Input 
+                placeholder="New file name (e.g. data_dump.csv)" 
+                value={newFileName}
+                onChange={(e) => setNewFileName(e.target.value)}
+              />
+              <Button size="icon" onClick={handleAddFile} disabled={!newFileName}>
+                <Upload className="h-4 w-4" />
+              </Button>
+            </div>
+            
+            <Separator />
+            
+            <ScrollArea className="h-[250px] pr-4">
+              <div className="space-y-2">
+                {viewingMission?.files.length === 0 ? (
+                  <p className="text-center text-sm text-muted-foreground py-8">
+                    No files uploaded yet.
+                  </p>
+                ) : (
+                  viewingMission?.files.map((file, idx) => (
+                    <div key={idx} className="flex items-center justify-between p-2 rounded-md bg-muted/50 border group">
+                      <div className="flex items-center gap-3">
+                        <FileText className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm font-medium">{file}</span>
+                      </div>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-8 w-8 opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive"
+                        onClick={() => handleDeleteFile(file)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))
+                )}
+              </div>
+            </ScrollArea>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setStorageDialogOpen(false)}>Close</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
