@@ -31,7 +31,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { PlusCircle, Trash2, ShieldAlert, Radar, FileText, Upload, FileCode } from 'lucide-react';
+import { PlusCircle, Trash2, MapPin, Radar, FileText, Upload, FileCode, ShieldAlert } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
@@ -42,13 +42,12 @@ interface Mission {
 }
 
 const initialSybilMissions: Mission[] = [
-  { id: 1, title: 'Bangalore', files: ['comm_log_001.csv', 'node_analysis_v1.pdf'] },
-  { id: 2, title: 'Chennai', files: ['चेन्नई_traffic_data.json'] },
-  { id: 3, title: 'Mumbai', files: [] },
+  { id: 1, title: 'Los Angeles', files: ['comm_log_la_01.csv'] },
+  { id: 2, title: 'San Francisco', files: ['sf_traffic_data.json'] },
 ];
 
 const initialSensorMissions: Mission[] = [
-  { id: 101, title: 'Delhi Route Alpha', files: ['sensor_stream_dump.log'] },
+  { id: 101, title: 'New York Central', files: ['sensor_ny_stream.log'] },
 ];
 
 export default function MissionsPage() {
@@ -147,106 +146,113 @@ export default function MissionsPage() {
       {missions.map((mission) => (
         <Card 
           key={mission.id} 
-          className="cursor-pointer transition-shadow hover:shadow-md group relative overflow-hidden"
-          onClick={() => openStorage(mission, type)}
+          className="group relative overflow-hidden transition-all hover:shadow-lg border-2"
         >
-          <CardHeader className="flex flex-row items-start justify-between">
-            <CardTitle className="text-lg font-semibold">{mission.title}</CardTitle>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-xl font-bold text-foreground/90">{mission.title}</CardTitle>
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button 
                   variant="ghost" 
                   size="icon" 
-                  className="h-7 w-7 text-muted-foreground hover:text-destructive"
-                  onClick={(e) => e.stopPropagation()}
+                  className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                 >
-                  <Trash2 className="h-4 w-4" />
+                  <Trash2 className="h-5 w-5" />
                 </Button>
               </AlertDialogTrigger>
-              <AlertDialogContent onClick={(e) => e.stopPropagation()}>
+              <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                  <AlertDialogTitle>Delete Mission?</AlertDialogTitle>
                   <AlertDialogDescription>
-                    This action cannot be undone. This will permanently delete the mission
-                    <span className="font-semibold"> {mission.title}</span> and all its stored files.
+                    This will permanently delete <span className="font-semibold">{mission.title}</span> and all {mission.files.length} associated files.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={() => handleDeleteMission(mission.id, type)}>
+                  <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={() => handleDeleteMission(mission.id, type)}>
                     Delete
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 pt-2">
             {mapThumbnail && (
-              <div className="aspect-video overflow-hidden rounded-md">
+              <div className="aspect-[16/9] relative overflow-hidden rounded-md border">
                 <Image
                   src={`${mapThumbnail.imageUrl}?seed=${mission.id}`}
-                  alt="Map thumbnail"
-                  width={400}
-                  height={200}
-                  className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                  alt="Map terrain"
+                  fill
+                  className="object-cover transition-transform duration-500 group-hover:scale-110"
                   data-ai-hint={mapThumbnail.imageHint}
                 />
               </div>
             )}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <FileText className="h-4 w-4" />
-                <span>{mission.files.length} files stored</span>
-              </div>
-              <Button variant="outline" size="sm" className="h-8">View Storage</Button>
-            </div>
+            <Button 
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold h-11" 
+              onClick={() => openStorage(mission, type)}
+            >
+              View Mission
+            </Button>
           </CardContent>
         </Card>
       ))}
       {missions.length === 0 && (
-        <div className="col-span-full py-12 text-center text-muted-foreground border-2 border-dashed rounded-lg">
-          No missions found in this category.
+        <div className="col-span-full py-20 text-center text-muted-foreground border-2 border-dashed rounded-xl bg-muted/20">
+          <p className="text-lg font-medium">No missions active in this sector.</p>
+          <p className="text-sm">Click "Create Mission" to begin data tracking.</p>
         </div>
       )}
     </div>
   );
 
   return (
-    <div className="space-y-12">
-      <div>
-        <h1 className="text-3xl font-semibold font-headline">Missions & Storage</h1>
-        <p className="text-muted-foreground">
-          Manage location-based data and analysis logs for threat detection. Use "View Storage" to manage files for each mission.
+    <div className="space-y-10 pb-12">
+      <div className="space-y-1">
+        <h1 className="text-4xl font-extrabold text-[#1a2b4b]">Missions & Data Management</h1>
+        <p className="text-muted-foreground text-lg">
+          Organize missions, manage data files, and trigger analysis.
         </p>
       </div>
 
       <section className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <ShieldAlert className="text-primary h-6 w-6" />
-            <h2 className="text-2xl font-semibold">Sybil Attack File Storage</h2>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <div className="flex items-center gap-3">
+              <MapPin className="text-primary h-7 w-7" />
+              <h2 className="text-2xl font-bold text-[#1a2b4b]">Sybil Missions</h2>
+            </div>
+            <p className="text-muted-foreground">Monitor and manage missions for Sybil threat analysis by location.</p>
           </div>
-          <Button onClick={() => openAddDialog('sybil')}>
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Add Sybil Mission
+          <Button 
+            className="bg-primary hover:bg-primary/90 text-white font-bold h-11 px-6 shadow-md"
+            onClick={() => openAddDialog('sybil')}
+          >
+            <PlusCircle className="mr-2 h-5 w-5" />
+            Create Mission
           </Button>
         </div>
-        <Separator />
         <MissionList missions={sybilMissions} type="sybil" />
       </section>
 
-      <section className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Radar className="text-accent h-6 w-6" />
-            <h2 className="text-2xl font-semibold">Sensor Spoofing File Storage</h2>
+      <section className="space-y-6 pt-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <div className="flex items-center gap-3">
+              <Radar className="text-accent h-7 w-7" />
+              <h2 className="text-2xl font-bold text-[#1a2b4b]">Sensor Spoofing Missions</h2>
+            </div>
+            <p className="text-muted-foreground">Manage data storage and analysis logs for sensor anomaly detection.</p>
           </div>
-          <Button variant="secondary" onClick={() => openAddDialog('sensor')}>
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Add Sensor Mission
+          <Button 
+            variant="secondary"
+            className="bg-accent hover:bg-accent/90 text-white font-bold h-11 px-6 shadow-md"
+            onClick={() => openAddDialog('sensor')}
+          >
+            <PlusCircle className="mr-2 h-5 w-5" />
+            Create Mission
           </Button>
         </div>
-        <Separator />
         <MissionList missions={sensorMissions} type="sensor" />
       </section>
 
@@ -254,55 +260,53 @@ export default function MissionsPage() {
       <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Add New {targetType === 'sybil' ? 'Sybil' : 'Sensor'} Mission</DialogTitle>
+            <DialogTitle>Create New {targetType === 'sybil' ? 'Sybil' : 'Sensor'} Mission</DialogTitle>
             <DialogDescription>
-              Enter the details for the new location or storage entry.
+              Assign a location name for the new tracking mission.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="title" className="text-right">
-                Title
-              </Label>
+            <div className="space-y-2">
+              <Label htmlFor="title">Location Name</Label>
               <Input
                 id="title"
                 value={newMissionTitle}
                 onChange={(e) => setNewMissionTitle(e.target.value)}
-                className="col-span-3"
                 placeholder="e.g., Downtown Sector A"
+                className="h-11"
               />
             </div>
           </div>
           <DialogFooter>
-            <Button onClick={handleAddMission}>Create Entry</Button>
+            <Button onClick={handleAddMission} className="w-full h-11">Create Entry</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Dialog for Mission File Storage (View Mission Details) */}
+      {/* Dialog for Mission Data Storage */}
       <Dialog open={storageDialogOpen} onOpenChange={setStorageDialogOpen}>
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent className="sm:max-w-[550px]">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <FileCode className="h-5 w-5 text-primary" />
-              {viewingMission?.title} - Mission Data Storage
+            <DialogTitle className="flex items-center gap-2 text-2xl">
+              <FileCode className="h-6 w-6 text-primary" />
+              {viewingMission?.title}
             </DialogTitle>
-            <DialogDescription>
-              Upload and manage CSV logs or other data files for this specific location.
+            <DialogDescription className="text-base">
+              Manage data files and communication logs for this mission location.
             </DialogDescription>
           </DialogHeader>
           
-          <div className="space-y-6 py-4">
-            <div className="flex flex-col items-center justify-center border-2 border-dashed rounded-lg p-6 bg-muted/30">
-              <Upload className="h-8 w-8 text-muted-foreground mb-2" />
-              <p className="text-sm text-center mb-4 text-muted-foreground">
-                Upload CSV or communication log files
+          <div className="space-y-6 py-6">
+            <div className="flex flex-col items-center justify-center border-2 border-dashed rounded-xl p-10 bg-muted/10 transition-colors hover:bg-muted/20">
+              <Upload className="h-12 w-12 text-muted-foreground mb-4" />
+              <p className="text-base font-medium text-center mb-6 text-muted-foreground">
+                Drag and drop CSV logs or click to upload
               </p>
               <Label 
                 htmlFor="mission-file-upload" 
-                className="cursor-pointer bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 rounded-md text-sm transition-colors flex items-center gap-2"
+                className="cursor-pointer bg-primary text-primary-foreground hover:bg-primary/90 px-6 py-3 rounded-lg text-sm font-bold transition-all flex items-center gap-2 shadow-sm"
               >
-                <Upload className="h-4 w-4" />
+                <Upload className="h-5 w-5" />
                 Upload CSV File
               </Label>
               <Input 
@@ -314,38 +318,44 @@ export default function MissionsPage() {
               />
             </div>
             
-            <div className="space-y-3">
-              <h3 className="text-sm font-semibold flex items-center gap-2">
-                <FileText className="h-4 w-4" />
-                Stored Files ({viewingMission?.files.length || 0})
-              </h3>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-bold flex items-center gap-2">
+                  <FileText className="h-5 w-5 text-primary" />
+                  Stored Logs
+                </h3>
+                <span className="text-sm text-muted-foreground font-medium bg-muted px-2 py-0.5 rounded-full">
+                  {viewingMission?.files.length || 0} Total
+                </span>
+              </div>
               <Separator />
               
-              <ScrollArea className="h-[200px] pr-4">
-                <div className="space-y-2">
+              <ScrollArea className="h-[250px] pr-4">
+                <div className="space-y-3">
                   {viewingMission?.files.length === 0 ? (
-                    <p className="text-center text-sm text-muted-foreground py-8">
-                      No files stored for this mission yet.
-                    </p>
+                    <div className="flex flex-col items-center justify-center py-10 text-muted-foreground">
+                      <FileText className="h-8 w-8 mb-2 opacity-20" />
+                      <p className="text-sm italic">No data logs stored for this sector.</p>
+                    </div>
                   ) : (
                     viewingMission?.files.map((file, idx) => (
-                      <div key={idx} className="flex items-center justify-between p-3 rounded-md bg-muted/50 border group">
-                        <div className="flex items-center gap-3">
-                          <div className="p-2 bg-background rounded-md border">
-                            <FileText className="h-4 w-4 text-primary" />
+                      <div key={idx} className="flex items-center justify-between p-4 rounded-xl bg-muted/30 border-2 group hover:border-primary/30 transition-all">
+                        <div className="flex items-center gap-4">
+                          <div className="p-2.5 bg-background rounded-lg border shadow-sm">
+                            <FileText className="h-5 w-5 text-primary" />
                           </div>
                           <div className="flex flex-col">
-                            <span className="text-sm font-medium">{file}</span>
-                            <span className="text-xs text-muted-foreground">Stored Log</span>
+                            <span className="text-sm font-bold truncate max-w-[200px]">{file}</span>
+                            <span className="text-xs text-muted-foreground">Communication Log</span>
                           </div>
                         </div>
                         <Button 
                           variant="ghost" 
                           size="icon" 
-                          className="h-8 w-8 opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive"
+                          className="h-9 w-9 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                           onClick={() => handleDeleteFile(file)}
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <Trash2 className="h-5 w-5" />
                         </Button>
                       </div>
                     ))
@@ -356,7 +366,7 @@ export default function MissionsPage() {
           </div>
           
           <DialogFooter>
-            <Button variant="outline" onClick={() => setStorageDialogOpen(false)}>Close Storage</Button>
+            <Button variant="outline" className="w-full h-11" onClick={() => setStorageDialogOpen(false)}>Close Storage</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
