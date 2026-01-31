@@ -31,8 +31,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { PlusCircle, Trash2, MapPin, Radar, FileText, Upload, FileCode } from 'lucide-react';
-import { Separator } from '@/components/ui/separator';
+import { PlusCircle, Trash2, MapPin, Radar, FileText, Upload } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 
@@ -284,7 +283,7 @@ export default function MissionsPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Dialog for Mission Data Storage - Styled to match screenshot */}
+      {/* Dialog for Mission Data Storage */}
       <Dialog open={storageDialogOpen} onOpenChange={setStorageDialogOpen}>
         <DialogContent className="sm:max-w-[650px] p-0 overflow-hidden">
           <div className="p-8 space-y-6">
