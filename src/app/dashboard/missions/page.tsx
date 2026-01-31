@@ -19,7 +19,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import {
   AlertDialog,
@@ -46,19 +45,17 @@ import { Separator } from '@/components/ui/separator';
 
 const initialSybilMissions = [
   { id: 1, title: 'Bangalore', status: 'In Progress', statusVariant: 'default' },
-  { id: 2, title: 'Chennai', status: 'Planned', statusVariant: 'outline' },
-  { id: 3, title: 'Mumbai', status: 'Planned', statusVariant: 'outline' },
+  { id: 2, title: 'Chennai', status: 'In Progress', statusVariant: 'default' },
+  { id: 3, title: 'Mumbai', status: 'Alert', statusVariant: 'destructive' },
 ];
 
 const initialSensorMissions = [
-  { id: 101, title: 'Delhi Route Alpha', status: 'Completed', statusVariant: 'secondary' },
+  { id: 101, title: 'Delhi Route Alpha', status: 'In Progress', statusVariant: 'default' },
 ];
 
 const statusOptions = {
   'In Progress': 'default',
-  'Completed': 'secondary',
   'Alert': 'destructive',
-  'Planned': 'outline',
 };
 
 type MissionStatus = keyof typeof statusOptions;
@@ -79,7 +76,7 @@ export default function MissionsPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [targetType, setTargetType] = useState<'sybil' | 'sensor'>('sybil');
   const [newMissionTitle, setNewMissionTitle] = useState('');
-  const [newMissionStatus, setNewMissionStatus] = useState<MissionStatus>('Planned');
+  const [newMissionStatus, setNewMissionStatus] = useState<MissionStatus>('In Progress');
 
   const openAddDialog = (type: 'sybil' | 'sensor') => {
     setTargetType(type);
@@ -106,7 +103,7 @@ export default function MissionsPage() {
     }
 
     setNewMissionTitle('');
-    setNewMissionStatus('Planned');
+    setNewMissionStatus('In Progress');
     setDialogOpen(false);
   };
 
@@ -244,7 +241,7 @@ export default function MissionsPage() {
               </Label>
               <Select
                 onValueChange={(value: MissionStatus) => setNewMissionStatus(value)}
-                defaultValue={newMissionStatus}
+                value={newMissionStatus}
               >
                 <SelectTrigger className="col-span-3">
                   <SelectValue placeholder="Select a status" />
