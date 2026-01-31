@@ -5,11 +5,9 @@ import Image from 'next/image';
 import {
   Card,
   CardContent,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Button } from '@/components/ui/button';
 import {
@@ -33,38 +31,22 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { PlusCircle, Trash2, ShieldAlert, Radar } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 
 const initialSybilMissions = [
-  { id: 1, title: 'Bangalore', status: 'In Progress', statusVariant: 'default' },
-  { id: 2, title: 'Chennai', status: 'In Progress', statusVariant: 'default' },
-  { id: 3, title: 'Mumbai', status: 'Alert', statusVariant: 'destructive' },
+  { id: 1, title: 'Bangalore' },
+  { id: 2, title: 'Chennai' },
+  { id: 3, title: 'Mumbai' },
 ];
 
 const initialSensorMissions = [
-  { id: 101, title: 'Delhi Route Alpha', status: 'In Progress', statusVariant: 'default' },
+  { id: 101, title: 'Delhi Route Alpha' },
 ];
-
-const statusOptions = {
-  'In Progress': 'default',
-  'Alert': 'destructive',
-};
-
-type MissionStatus = keyof typeof statusOptions;
 
 interface Mission {
   id: number;
   title: string;
-  status: string;
-  statusVariant: string;
 }
 
 export default function MissionsPage() {
@@ -76,7 +58,6 @@ export default function MissionsPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [targetType, setTargetType] = useState<'sybil' | 'sensor'>('sybil');
   const [newMissionTitle, setNewMissionTitle] = useState('');
-  const [newMissionStatus, setNewMissionStatus] = useState<MissionStatus>('In Progress');
 
   const openAddDialog = (type: 'sybil' | 'sensor') => {
     setTargetType(type);
@@ -92,8 +73,6 @@ export default function MissionsPage() {
     const newMission: Mission = {
       id: newId,
       title: newMissionTitle,
-      status: newMissionStatus,
-      statusVariant: statusOptions[newMissionStatus],
     };
 
     if (targetType === 'sybil') {
@@ -103,7 +82,6 @@ export default function MissionsPage() {
     }
 
     setNewMissionTitle('');
-    setNewMissionStatus('In Progress');
     setDialogOpen(false);
   };
 
@@ -158,9 +136,6 @@ export default function MissionsPage() {
               </div>
             )}
           </CardContent>
-          <CardFooter>
-            <Badge variant={mission.statusVariant as any}>{mission.status}</Badge>
-          </CardFooter>
         </Card>
       ))}
       {missions.length === 0 && (
@@ -234,26 +209,6 @@ export default function MissionsPage() {
                 className="col-span-3"
                 placeholder="e.g., Downtown Sector A"
               />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="status" className="text-right">
-                Status
-              </Label>
-              <Select
-                onValueChange={(value: MissionStatus) => setNewMissionStatus(value)}
-                value={newMissionStatus}
-              >
-                <SelectTrigger className="col-span-3">
-                  <SelectValue placeholder="Select a status" />
-                </SelectTrigger>
-                <SelectContent>
-                  {Object.keys(statusOptions).map((status) => (
-                    <SelectItem key={status} value={status}>
-                      {status}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
             </div>
           </div>
           <DialogFooter>
