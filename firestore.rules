@@ -10,102 +10,56 @@
  * read-only access to prevent unauthorized data manipulation.
  *
  * Data Structure:
- * The data is organized into a flat structure with two top-level collections:
- * `/vehicleCommunicationLogs` and `/sybilDetectionResults`. This design avoids
- * hierarchical dependencies and the need for costly `get()` calls in security rules,
- * making authorization checks simple and performant.
+ * The data is organized into a flat structure with several top-level collections:
+ * `/vehicleCommunicationLogs`, `/sybilDetectionResults`, `/sybil_attacks`, and `/detection_logs`.
  *
  * Key Security Decisions:
- * 1. Backend-Only Writes: All write operations (`create`, `update`, `delete`) are
- *    explicitly denied for client SDKs for most collections. This is the cornerstone of the security
- *    model, ensuring data integrity by routing all changes through a controlled
- *    backend service.
- * 2. Public Read Access: Data within the collections is considered non-sensitive
- *    and is made available for public read (`get`, `list`). This supports client-side
- *    applications that need to display detection results or log data without
- *    requiring user authentication.
- * 3. Client-side writes for logs: The `detection_logs` collection allows authenticated
- *    clients to write new log entries, but not modify or delete them.
- *
- * Denormalization for Authorization:
- * This principle is not heavily utilized as there are no user-specific permissions.
- * The flat data structure inherently avoids the need to denormalize ownership or
- * role data for authorization purposes.
- *
- * Structural Segregation:
- * The clear separation of `vehicleCommunicationLogs` and `sybilDetectionResults`
- * into distinct top-level collections provides a clean and secure boundary for
- * applying broad access policies.
+ * 1. Backend-Only Writes: For communication logs, only backend services should write.
+ * 2. Authenticated Access: For detection results and logs, authenticated users can read and create entries.
+ * 3. Public Read Access: Some raw logs may be public, but detection results require auth.
  */
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
     // Helper Functions
-    /**
-     * @description Checks if a user is authenticated.
-     * @returns {boolean} True if the user is signed in, false otherwise.
-     */
     function isSignedIn() {
-      // v2
       return request.auth != null;
     }
 
     /**
-     * @description
-     * Stores vehicle communication logs for Sybil attack detection. This data is
-     * written by backend services and is publicly readable by any client.
      * @path /vehicleCommunicationLogs/{vehicleCommunicationLogId}
-     * @allow (get) Any user, signed in or not, can read a specific log.
-     * @allow (list) Any user, signed in or not, can list all logs.
-     * @deny (create, update, delete) All write operations are blocked from client SDKs.
-     * @principle Implements a "Public Read, Backend-Only Write" model. This secures the
-     *   data's integrity by forcing all modifications through a trusted server
-     *   environment, while allowing open consumption of the data by clients.
      */
     match /vehicleCommunicationLogs/{vehicleCommunicationLogId} {
-      allow get: if true;
-      allow list: if true;
-      allow create: if false;
-      allow update: if false;
-      allow delete: if false;
+      allow get, list: if true;
+      allow create, update, delete: if false;
     }
 
     /**
-     * @description
-     * Stores the results of Sybil attack detection analyses. This data is generated
-     * by backend processes and is publicly readable by any client.
      * @path /sybilDetectionResults/{sybilDetectionResultId}
-     * @allow (get) Any user, signed in or not, can read a specific detection result.
-     * @allow (list) Any user, signed in or not, can list all detection results.
-     * @deny (create, update, delete) All write operations are blocked from client SDKs.
-     * @principle Implements a "Public Read, Backend-Only Write" model. This secures the
-     *   data's integrity by forcing all modifications through a trusted server
-     *   environment, while allowing open consumption of the data by clients.
      */
     match /sybilDetectionResults/{sybilDetectionResultId} {
-      allow get: if true;
-      allow list: if true;
-      allow create: if false;
-      allow update: if false;
-      allow delete: if false;
+      allow get, list: if isSignedIn();
+      allow create, update, delete: if false;
     }
 
     /**
      * @description
-     * Stores logs of all threat detection events (Sybil, Sensor, etc.). This data is written by clients
-     * after running a detection analysis.
+     * Stores Sybil attack logs used by the History page.
+     * @path /sybil_attacks/{attackId}
+     */
+    match /sybil_attacks/{attackId} {
+      allow get, list: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update, delete: if false;
+    }
+
+    /**
      * @path /detection_logs/{logId}
-     * @allow (create) Any authenticated user can create a new detection log.
-     * @allow (get, list) Any authenticated user can read the detection history.
-     * @deny (update, delete) All other operations are denied to clients.
-     * @principle A `list` permission is required for collection queries (like on the History page).
-     *   The `get` permission allows reading individual documents if needed.
      */
     match /detection_logs/{logId} {
-      // Allow authenticated users to create and read logs.
-      allow create: if request.auth != null;
-      allow get, list: if request.auth != null;
+      allow get, list: if isSignedIn();
+      allow create: if isSignedIn();
       allow update, delete: if false;
     }
   }
