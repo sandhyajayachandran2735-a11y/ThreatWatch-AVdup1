@@ -297,8 +297,6 @@ export default function SybilDetectionPage() {
             </form>
           </CardContent>
         </Card>
-
-        <SpoofingCard />
       </div>
 
       <div className="flex flex-col gap-6">
@@ -368,6 +366,10 @@ export default function SybilDetectionPage() {
             )}
           </CardContent>
         </Card>
+      </div>
+
+      <div className="lg:col-span-2">
+        <SpoofingCard />
       </div>
     </div>
   );
