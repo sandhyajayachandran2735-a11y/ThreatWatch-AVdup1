@@ -306,7 +306,7 @@ export default function SybilDetectionPage() {
         <Card>
           <CardHeader>
             <CardTitle>Prediction Result</CardTitle>
-             <CardDescription>AI-Powered Threat Advisor Analysis.</CardDescription>
+             <CardDescription>Real-time analysis from the backend model and interpreted by the AI</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col items-center justify-center min-h-[630px] space-y-4">
             {isLoading ? (

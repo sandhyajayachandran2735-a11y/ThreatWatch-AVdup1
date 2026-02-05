@@ -266,7 +266,7 @@ export default function SensorSpoofingPage() {
       <Card>
         <CardHeader>
           <CardTitle className="text-xl font-semibold">Detection Results</CardTitle>
-          <CardDescription>AI-Powered Threat Advisor Analysis.</CardDescription>
+          <CardDescription>Real-time analysis from the backend model and interpreted by the AI</CardDescription>
         </CardHeader>
         <CardContent className="min-h-[630px] flex items-center justify-center">
         {isLoading ? (
@@ -329,7 +329,7 @@ export default function SensorSpoofingPage() {
         ) : (
            <div className="text-center text-muted-foreground flex flex-col items-center gap-3">
                 <ShieldQuestion className="h-12 w-12 opacity-20" />
-                <p>Submit sensor data to see the AI advisor's report.</p>
+                <p>Submit data to get an AI-powered prediction and advisor report.</p>
             </div>
         )}
         </CardContent>
