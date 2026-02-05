@@ -16,5 +16,6 @@ export const DetectSybilAttackOutputSchema = z.object({
   isMalicious: z.boolean().describe('Whether or not the vehicle is predicted to be a malicious (Sybil) node.'),
   confidence: z.number().min(0).max(1).describe('The confidence score of the prediction (0 to 1).'),
   reasoning: z.string().describe('A brief explanation for the prediction.'),
+  mitigationSteps: z.array(z.string()).describe('A list of 3-5 recommended technical actions to mitigate the detected threat or maintain safety.'),
 });
 export type DetectSybilAttackOutput = z.infer<typeof DetectSybilAttackOutputSchema>;

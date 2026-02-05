@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -22,12 +21,13 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { AlertCircle, CheckCircle, Loader2, UploadCloud } from 'lucide-react';
+import { AlertCircle, CheckCircle, Loader2, UploadCloud, ShieldCheck, ShieldAlert, ListChecks } from 'lucide-react';
 import { Gauge } from '@/components/gauge';
 import { useToast } from '@/hooks/use-toast';
 import SpoofingCard from "../sybil-detection/spoofing";
 import { useMaliciousCount } from '../context/malicious-count-context';
 import { useAnalysis } from '../context/analysis-context';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const DetectSybilAttackInputSchema = z.object({
   x: z.number(),
@@ -42,6 +42,8 @@ type SybilPredictionResult = {
   prediction: 0 | 1;
   confidence: number;
   used_features?: string[];
+  reasoning?: string;
+  mitigationSteps?: string[];
 };
 
 const sampleData = {
@@ -64,6 +66,7 @@ export default function SybilDetectionPage() {
     isMalicious: boolean;
     confidence: number;
     reasoning: string;
+    mitigationSteps: string[];
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
@@ -72,7 +75,7 @@ export default function SybilDetectionPage() {
     resolver: zodResolver(DetectSybilAttackInputSchema),
   });
 
-  const saveToHistory = (isMalicious: boolean, confidence: number, reasoning: string, source: 'Manual' | 'CSV', inputs: any) => {
+  const saveToHistory = (isMalicious: boolean, confidence: number, reasoning: string, mitigationSteps: string[], source: 'Manual' | 'CSV', inputs: any) => {
     if (!db) return;
     
     const logData = {
@@ -85,6 +88,7 @@ export default function SybilDetectionPage() {
         isMalicious,
         confidence,
         reasoning,
+        mitigationSteps,
         inputs
       }
     };
@@ -104,22 +108,26 @@ export default function SybilDetectionPage() {
     const isMalicious = result.prediction === 1;
     const confidence = result.confidence ?? 0.5;
     
-    // Detailed reasoning for non-technical users
-    const reasoning = isMalicious
+    const reasoning = result.reasoning || (isMalicious
         ? `Potential Sybil Attack Detected: This vehicle is broadcasting data that matches patterns of identity spoofing. In a Sybil attack, one malicious vehicle creates multiple fake personas to manipulate traffic reports or disrupt the communication network. Our AI model has flagged this behavior with ${Math.round(confidence * 100)}% certainty, suggesting this node should be isolated to prevent network disruption.`
-        : `Safe Operation Confirmed: The vehicle's communication patterns, including its speed, position, and acceleration, are consistent with normal physical movement and network protocols. No signs of identity manipulation or "ghost vehicles" were detected. The node is behaving as a single, legitimate entity within the Vehicular Network.`;
+        : `Safe Operation Confirmed: The vehicle's communication patterns, including its speed, position, and acceleration, are consistent with normal physical movement and network protocols. No signs of identity manipulation or "ghost vehicles" were detected. The node is behaving as a single, legitimate entity within the Vehicular Network.`);
+
+    const mitigationSteps = result.mitigationSteps || (isMalicious 
+      ? ["Isolate the detected vehicle ID from the network", "Initiate identity re-verification for all nodes in the sector", "Update local VANET trust certificates"]
+      : ["Perform routine communication integrity check", "Log benign activity for behavior baseline", "Ensure firmware is updated to the latest security patch"]);
 
     setPrediction({
       isMalicious,
       confidence: confidence,
       reasoning,
+      mitigationSteps,
     });
 
     if (isMalicious) {
       setMaliciousCount(prevCount => prevCount + 1);
     }
 
-    saveToHistory(isMalicious, confidence, reasoning, source, inputs);
+    saveToHistory(isMalicious, confidence, reasoning, mitigationSteps, source, inputs);
 
     toast({
       title: 'Analysis complete',
@@ -276,7 +284,7 @@ export default function SybilDetectionPage() {
         <Card>
           <CardHeader>
             <CardTitle>Prediction Result</CardTitle>
-             <CardDescription>Real-time analysis from the backend model.</CardDescription>
+             <CardDescription>AI-Powered Threat Advisor Analysis.</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col items-center justify-center min-h-[630px] space-y-4">
             {isLoading ? (
@@ -290,15 +298,15 @@ export default function SybilDetectionPage() {
             ) : prediction ? (
               <div className="flex flex-col items-center text-center space-y-6 w-full">
                 <div className="text-center">
-                    <p className="text-sm font-medium text-muted-foreground">Analysis Complete</p>
+                    <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Analysis Complete</p>
                 </div>
                 {prediction.isMalicious ? (
                   <div className="text-destructive text-2xl flex items-center justify-center gap-2 font-bold">
-                    <AlertCircle /> Malicious Node
+                    <ShieldAlert className="h-7 w-7" /> Malicious Node
                   </div>
                 ) : (
                   <div className="text-success text-2xl flex items-center justify-center gap-2 font-bold">
-                    <CheckCircle /> Benign Node
+                    <ShieldCheck className="h-7 w-7" /> Benign Node
                   </div>
                 )}
                 
@@ -306,16 +314,36 @@ export default function SybilDetectionPage() {
                   <Gauge value={Math.round(prediction.confidence * 100)} label="Confidence" />
                 </div>
                 
-                <Separator />
-                <div className="text-left w-full">
-                    <h4 className="text-sm font-medium mb-2">Detailed Reasoning</h4>
+                <Tabs defaultValue="reasoning" className="w-full">
+                  <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="reasoning">Detailed Reasoning</TabsTrigger>
+                    <TabsTrigger value="mitigation">Mitigation Steps</TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="reasoning" className="text-left mt-4">
                     <p className="text-sm text-muted-foreground bg-muted p-4 rounded-md leading-relaxed">
                         {prediction.reasoning}
                     </p>
-                </div>
+                  </TabsContent>
+                  <TabsContent value="mitigation" className="text-left mt-4">
+                    <div className="bg-muted p-4 rounded-md space-y-3 border-l-4 border-primary">
+                        <h4 className="text-sm font-bold flex items-center gap-2">
+                            <ListChecks className="h-4 w-4" />
+                            Recommended Actions
+                        </h4>
+                        <ul className="text-sm text-muted-foreground space-y-2 list-disc list-inside">
+                            {prediction.mitigationSteps.map((step, idx) => (
+                                <li key={idx}>{step}</li>
+                            ))}
+                        </ul>
+                    </div>
+                  </TabsContent>
+                </Tabs>
               </div>
             ) : (
-              <p className="text-muted-foreground text-center">Submit data to get a prediction.</p>
+              <div className="text-center flex flex-col items-center gap-3 text-muted-foreground">
+                <ShieldCheck className="h-12 w-12 opacity-20" />
+                <p>Submit data to get an AI-powered prediction and advisor report.</p>
+              </div>
             )}
           </CardContent>
         </Card>

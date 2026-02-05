@@ -19,12 +19,13 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { AlertCircle, CheckCircle, Loader2, ShieldQuestion, UploadCloud } from 'lucide-react';
+import { AlertCircle, CheckCircle, Loader2, ShieldQuestion, UploadCloud, ShieldCheck, ListChecks } from 'lucide-react';
 import { Gauge } from '@/components/gauge';
 import { useToast } from '@/hooks/use-toast';
 import * as z from 'zod';
 import { useAnalysis } from '../context/analysis-context';
 import { useMaliciousCount } from '../context/malicious-count-context';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const SensorSpoofingInputSchema = z.object({
   speed_kmh: z.number(),
@@ -52,6 +53,7 @@ export default function SensorSpoofingPage() {
     action: string; 
     confidence: number;
     reasoning: string;
+    mitigationSteps: string[];
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
@@ -65,7 +67,7 @@ export default function SensorSpoofingPage() {
     defaultValues: defaultValues,
   });
 
-  const saveToHistory = (action: string, confidence: number, reasoning: string, source: 'Manual' | 'CSV', inputs: any) => {
+  const saveToHistory = (action: string, confidence: number, reasoning: string, mitigationSteps: string[], source: 'Manual' | 'CSV', inputs: any) => {
     if (!db) return;
     
     const isMalicious = action !== 'Normal Driving';
@@ -79,6 +81,7 @@ export default function SensorSpoofingPage() {
         action,
         confidence,
         reasoning,
+        mitigationSteps,
         inputs
       }
     };
@@ -99,22 +102,26 @@ export default function SensorSpoofingPage() {
         const confidence = result.confidence ?? 0.5;
         const isMalicious = result.action !== 'Normal Driving';
         
-        // Detailed, non-technical reasoning for sensor spoofing
-        const reasoning = isMalicious
+        const reasoning = result.reasoning || (isMalicious
             ? `Critical Sensor Anomaly Detected: Our system has identified significant inconsistencies in the vehicle's sensor data, which often indicates external "spoofing." This occurs when false signals are sent to the vehicle's LIDAR or Radar to trick it into seeing obstacles that aren't there, or missing real ones. To ensure safety, the model recommends an immediate '${result.action}' protocol. We are ${Math.round(confidence * 100)}% confident that this behavior deviates from safe, normal operation.`
-            : `Safe Navigation Confirmed: All sensor inputs—including speed, lane alignment, and obstacle detection—are perfectly synchronized and consistent with a normal driving environment. The vehicle's perception of the road matches physical reality, and no signs of signal manipulation or sensor errors were found. It is safe to proceed with 'Normal Driving' protocols.`;
+            : `Safe Navigation Confirmed: All sensor inputs—including speed, lane alignment, and obstacle detection—are perfectly synchronized and consistent with a normal driving environment. The vehicle's perception of the road matches physical reality, and no signs of signal manipulation or sensor errors were found. It is safe to proceed with 'Normal Driving' protocols.`);
+
+        const mitigationSteps = result.mitigationSteps || (isMalicious
+            ? ["Switch perception system to secondary redundant sensor array", "Initiate emergency braking or pull-over maneuver", "Flag sensor ID for physical inspection and re-calibration"]
+            : ["Proceed with mission using primary sensor data", "Perform routine background calibration check", "Log sensor health metrics for historical baseline"]);
 
         setPrediction({
             action: result.action,
             confidence: confidence,
             reasoning: reasoning,
+            mitigationSteps,
         });
 
         if (isMalicious) {
             setMaliciousCount(prev => prev + 1);
         }
 
-        saveToHistory(result.action, confidence, reasoning, source, inputs);
+        saveToHistory(result.action, confidence, reasoning, mitigationSteps, source, inputs);
 
         toast({
             title: 'Analysis Complete',
@@ -244,7 +251,7 @@ export default function SensorSpoofingPage() {
       <Card>
         <CardHeader>
           <CardTitle className="text-xl font-semibold">Detection Results</CardTitle>
-          <CardDescription>Real-time analysis from the sensor spoofing model.</CardDescription>
+          <CardDescription>AI-Powered Threat Advisor Analysis.</CardDescription>
         </CardHeader>
         <CardContent className="min-h-[630px] flex items-center justify-center">
         {isLoading ? (
@@ -258,18 +265,18 @@ export default function SensorSpoofingPage() {
         ) : prediction ? (
           <div className="flex flex-col items-center text-center space-y-6 w-full">
             <div className="text-center">
-                <p className="text-sm font-medium text-muted-foreground">Analysis Complete</p>
+                <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Analysis Complete</p>
             </div>
             
             <div className="text-center">
                 {prediction.action === 'Normal Driving' ? (
                     <div className="flex items-center gap-2 text-2xl font-bold text-success">
-                        <CheckCircle className="h-6 w-6" />
+                        <ShieldCheck className="h-7 w-7" />
                         <span>{prediction.action}</span>
                     </div>
                 ) : (
                      <div className="flex items-center gap-2 text-2xl font-bold text-destructive">
-                        <AlertCircle className="h-6 w-6" />
+                        <AlertCircle className="h-7 w-7" />
                         <span>{prediction.action}</span>
                     </div>
                 )}
@@ -279,18 +286,35 @@ export default function SensorSpoofingPage() {
                <Gauge value={Math.round(prediction.confidence * 100)} label="Confidence" />
             </div>
 
-            <Separator />
-            <div className="text-left w-full">
-                <h3 className="text-sm font-medium mb-2">Detailed Reasoning</h3>
+            <Tabs defaultValue="reasoning" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="reasoning">Detailed Reasoning</TabsTrigger>
+                <TabsTrigger value="mitigation">Mitigation Steps</TabsTrigger>
+              </TabsList>
+              <TabsContent value="reasoning" className="text-left mt-4">
                 <p className="text-sm text-muted-foreground bg-muted p-4 rounded-md leading-relaxed">
                     {prediction.reasoning}
                 </p>
-            </div>
+              </TabsContent>
+              <TabsContent value="mitigation" className="text-left mt-4">
+                <div className="bg-muted p-4 rounded-md space-y-3 border-l-4 border-primary">
+                    <h4 className="text-sm font-bold flex items-center gap-2">
+                        <ListChecks className="h-4 w-4" />
+                        Recommended Actions
+                    </h4>
+                    <ul className="text-sm text-muted-foreground space-y-2 list-disc list-inside">
+                        {prediction.mitigationSteps.map((step, idx) => (
+                            <li key={idx}>{step}</li>
+                        ))}
+                    </ul>
+                </div>
+              </TabsContent>
+            </Tabs>
           </div>
         ) : (
-           <div className="text-center text-muted-foreground flex flex-col items-center gap-2">
-                <ShieldQuestion className="h-10 w-10" />
-                <p>Submit sensor data to see the model's prediction.</p>
+           <div className="text-center text-muted-foreground flex flex-col items-center gap-3">
+                <ShieldQuestion className="h-12 w-12 opacity-20" />
+                <p>Submit sensor data to see the AI advisor's report.</p>
             </div>
         )}
         </CardContent>

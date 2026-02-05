@@ -15,5 +15,6 @@ export const DetectSensorAnomalyOutputSchema = z.object({
   isAnomaly: z.boolean().describe('Whether or not the sensor reading is predicted to be an anomaly.'),
   confidence: z.number().min(0).max(1).describe('The confidence score of the prediction (0 to 1).'),
   reasoning: z.string().describe('A brief explanation for the prediction.'),
+  mitigationSteps: z.array(z.string()).describe('A list of 3-5 recommended technical actions to mitigate the detected anomaly or maintain sensor health.'),
 });
 export type DetectSensorAnomalyOutput = z.infer<typeof DetectSensorAnomalyOutputSchema>;

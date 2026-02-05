@@ -30,7 +30,15 @@ Evaluate the features provided. For example:
 - A 'redundancy_check_ok' value of 0 (false) means other sensors do not corroborate this reading, which is highly suspicious.
 - A very low 'time_since_last_reading_ms' might indicate a replay attack, while a very high value could indicate a sensor failure.
 
-Based on the combination of these factors, determine if the sensor reading is an anomaly. Provide a confidence score and a brief reasoning for your decision.
+Based on the combination of these factors, determine if the sensor reading is an anomaly.
+
+If an anomaly:
+1. Provide a clear, non-technical reasoning.
+2. Provide 3-5 immediate technical mitigation steps (e.g., 'Switch to redundant sensor', 'Initiate sensor self-calibration', 'Isolate affected data stream').
+
+If normal:
+1. Provide reasoning why the reading is safe.
+2. Provide 3-5 routine checkup steps.
 
 Sensor Data:
 - Sensor Type: {{sensor_type}}

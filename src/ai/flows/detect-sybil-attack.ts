@@ -21,7 +21,7 @@ const prompt = ai.definePrompt({
   name: 'detectSybilAttackPrompt',
   input: { schema: DetectSybilAttackInputSchema },
   output: { schema: DetectSybilAttackOutputSchema },
-  prompt: `You are a cybersecurity model trained to detect Sybil attacks in a Vehicular Ad-hoc Network (VANET), acting like a RandomForestClassifier.
+  prompt: `You are a cybersecurity expert specializing in Vehicular Ad-hoc Networks (VANETs).
 
 Your task is to analyze the following vehicle data and predict whether it is a malicious Sybil node.
 
@@ -31,7 +31,15 @@ Evaluate the features provided. For example:
 - Unusually high 'acceleration' or erratic 'direction' changes can be suspicious.
 - 'signal_strength' that is unusually high or low for its position might indicate spoofing.
 
-Based on the combination of these factors, determine if the node is malicious. Provide a confidence score and a brief reasoning for your decision.
+Based on the combination of these factors, determine if the node is malicious. 
+
+If malicious:
+1. Provide a clear, non-technical reasoning.
+2. Provide 3-5 immediate technical mitigation steps (e.g., 'Isolate Vehicle ID 0x4F', 'Update V2X trust certificates', 'Initiate identity re-verification').
+
+If benign:
+1. Provide a clear reasoning why it's safe.
+2. Provide 3-5 maintenance steps for ongoing monitoring.
 
 Vehicle Data:
 - Position X: {{position_x}}
