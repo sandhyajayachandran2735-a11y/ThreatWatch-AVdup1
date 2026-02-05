@@ -95,7 +95,7 @@ export default function DashboardPage() {
                 <span className="text-2xl font-bold opacity-50">...</span>
               </div>
             ) : (
-              <div className="text-2xl font-bold text-destructive">{stats.sybilMalicious}</div>
+              <div className="text-2xl font-bold text-foreground">{stats.sybilMalicious}</div>
             )}
           </CardContent>
         </Card>
@@ -120,7 +120,7 @@ export default function DashboardPage() {
                 <span className="text-2xl font-bold opacity-50">...</span>
               </div>
             ) : (
-              <div className="text-2xl font-bold text-accent">{stats.sensorMalicious}</div>
+              <div className="text-2xl font-bold text-foreground">{stats.sensorMalicious}</div>
             )}
           </CardContent>
         </Card>
