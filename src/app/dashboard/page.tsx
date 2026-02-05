@@ -144,7 +144,7 @@ export default function DashboardPage() {
         </div>
         <Card className="flex flex-col">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-xl font-semibold">Live Fleet View</CardTitle>
+            <CardTitle className="text-xl font-semibold">Live GPS Map</CardTitle>
             <MapIcon className="h-5 w-5 text-muted-foreground" />
           </CardHeader>
           <CardContent className="flex-1 min-h-[300px] p-0 overflow-hidden relative">
@@ -154,7 +154,8 @@ export default function DashboardPage() {
       </div>
 
       <AIThreatSummary
-        sybilAlertsToday={stats.totalAlerts}
+        sybilAlertsToday={stats.sybilMalicious}
+        sensorAlertsToday={stats.sensorMalicious}
       />
       
       <FloatingChatbot threatContext={threatContext} />

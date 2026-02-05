@@ -25,9 +25,12 @@ const prompt = ai.definePrompt({
   output: { schema: SummarizeVehicleThreatsOutputSchema },
   prompt: `You are a security analyst specializing in autonomous vehicle threat detection.
 
-  Based on the following threat intelligence signals, provide a prioritized summary of the most critical threats to vehicle safety. Highlight the most pressing issues that require immediate attention.
+  Based on the following threat intelligence signals from the fleet today, provide a prioritized summary of the most critical threats to vehicle safety. Highlight the most pressing issues that require immediate attention.
 
-  Sybil Alerts Today: {{sybilAlertsToday}}
+  - Sybil Alerts Today: {{sybilAlertsToday}}
+  - Sensor Spoofing Alerts Today: {{sensorAlertsToday}}
+
+  Analyze the risk based on these numbers. If both are high, warn of a coordinated multi-vector attack. If only one is active, explain the specific risk of that attack type (Sybil for network/identity disruption, Sensor for perception manipulation).
 
   {{#if additionalContext}}
   Additional Context: {{additionalContext}}

@@ -15,10 +15,12 @@ import { Loader2, Sparkles } from 'lucide-react';
 
 interface AIThreatSummaryProps {
   sybilAlertsToday: number;
+  sensorAlertsToday: number;
 }
 
 export function AIThreatSummary({
   sybilAlertsToday,
+  sensorAlertsToday,
 }: AIThreatSummaryProps) {
   const [summary, setSummary] = useState('');
   const [error, setError] = useState('');
@@ -30,6 +32,7 @@ export function AIThreatSummary({
     setSummary('');
     const result = await getAISummary({
       sybilAlertsToday,
+      sensorAlertsToday,
      });
     setIsLoading(false);
 
@@ -57,11 +60,11 @@ export function AIThreatSummary({
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         ) : summary ? (
-          <p className="text-sm">{summary}</p>
+          <p className="text-sm leading-relaxed">{summary}</p>
         ) : error ? (
           <p className="text-sm text-destructive">{error}</p>
         ) : (
-          <p className="text-sm text-muted-foreground">Click the button to generate a threat summary.</p>
+          <p className="text-sm text-muted-foreground">Click the button to generate a threat summary based on today's alerts.</p>
         )}
       </CardContent>
       <CardFooter>
