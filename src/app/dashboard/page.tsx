@@ -10,8 +10,10 @@ import {
 import { AlertTriangle, ShieldCheck, ShieldAlert, Loader2 } from 'lucide-react';
 import { AIThreatSummary } from './_components/ai-summary';
 import { FloatingChatbot } from './_components/floating-chatbot';
+import { ThreatTrendChart } from './_components/charts';
 import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, query, orderBy } from 'firebase/firestore';
+import { format, subDays, startOfDay, isSameDay } from 'date-fns';
 
 type ThreatEvent = {
   id: string;
@@ -34,36 +36,44 @@ type ThreatEvent = {
 export default function DashboardPage() {
   const firestore = useFirestore();
 
-  // Create a memoized query for all threat events ordered by timestamp
   const threatEventsQuery = useMemoFirebase(() => {
     if (!firestore) return null;
     return query(collection(firestore, 'threat_events'), orderBy('detectedAt', 'desc'));
   }, [firestore]);
 
-  // Use the useCollection hook to get real-time data from Firestore
   const { data: threatLogs, isLoading } = useCollection<ThreatEvent>(threatEventsQuery);
 
-  // Calculate stats based on the fetched logs for today
   const stats = useMemo(() => {
-    if (!threatLogs) return { sybilMalicious: 0, sensorMalicious: 0, totalAlerts: 0 };
+    if (!threatLogs) return { sybilMalicious: 0, sensorMalicious: 0, totalAlerts: 0, trendData: [] };
     
-    const todayStart = new Date();
-    todayStart.setHours(0, 0, 0, 0);
+    const todayStart = startOfDay(new Date());
 
-    // Filter logs for today
-    const todayLogs = threatLogs.filter(log => {
-      if (!log.detectedAt) return false;
-      const logDate = new Date(log.detectedAt.seconds * 1000);
-      return logDate >= todayStart;
+    // Aggregating 7-day trend
+    const trendData = Array.from({ length: 7 }).map((_, i) => {
+      const targetDate = subDays(todayStart, 6 - i);
+      const dayLogs = threatLogs.filter(log => {
+        if (!log.detectedAt) return false;
+        return isSameDay(new Date(log.detectedAt.seconds * 1000), targetDate);
+      });
+
+      return {
+        date: format(targetDate, 'MMM dd'),
+        sybil: dayLogs.filter(log => log.threatType === 'Sybil' && log.details?.isMalicious === true).length,
+        sensor: dayLogs.filter(log => log.threatType === 'Sensor Spoofing' && log.details?.action !== 'Normal Driving').length,
+      };
     });
 
-    // Count malicious Sybil attacks for today
+    // Today's stats
+    const todayLogs = threatLogs.filter(log => {
+      if (!log.detectedAt) return false;
+      return isSameDay(new Date(log.detectedAt.seconds * 1000), todayStart);
+    });
+
     const sybilMalicious = todayLogs.filter(log => 
       log.threatType === 'Sybil' && 
       log.details?.isMalicious === true
     ).length;
 
-    // Count malicious Sensor Spoofing flags for today
     const sensorMalicious = todayLogs.filter(log => 
       log.threatType === 'Sensor Spoofing' && 
       log.details?.action !== 'Normal Driving'
@@ -72,7 +82,8 @@ export default function DashboardPage() {
     return {
       sybilMalicious,
       sensorMalicious,
-      totalAlerts: sybilMalicious + sensorMalicious
+      totalAlerts: sybilMalicious + sensorMalicious,
+      trendData
     };
   }, [threatLogs]);
 
@@ -125,6 +136,8 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
       </div>
+
+      <ThreatTrendChart data={stats.trendData} />
 
       <AIThreatSummary
         sybilAlertsToday={stats.totalAlerts}

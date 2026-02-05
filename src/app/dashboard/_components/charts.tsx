@@ -1,88 +1,81 @@
-// 'use client';
+'use client';
 
-// import { Bar, BarChart, Line, LineChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer } from 'recharts';
-// import {
-//   ChartContainer,
-//   ChartTooltip,
-//   ChartTooltipContent,
-//   ChartLegend,
-//   ChartLegendContent,
-// } from '@/components/ui/chart';
-// import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Bar, BarChart, Line, LineChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer } from 'recharts';
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  ChartLegend,
+  ChartLegendContent,
+} from '@/components/ui/chart';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
-// const gpsAnomaliesData = [
-//   { time: '12:00', anomalies: 4 },
-//   { time: '13:00', anomalies: 3 },
-//   { time: '14:00', anomalies: 8 },
-//   { time: '15:00', anomalies: 5 },
-//   { time: '16:00', anomalies: 6 },
-//   { time: '17:00', anomalies: 7 },
-//   { time: '18:00', anomalies: 10 },
-// ];
+interface TrendData {
+  date: string;
+  sybil: number;
+  sensor: number;
+}
 
-// const spoofingFrequencyData = [
-//   { module: 'CAN Bus', frequency: 186 },
-//   { module: 'GPS', frequency: 305 },
-//   { module: 'LIDAR', frequency: 237 },
-//   { module: 'IMU', frequency: 73 },
-//   { module: 'Camera', frequency: 209 },
-// ];
+interface ThreatTrendChartProps {
+  data: TrendData[];
+}
 
-// const chartConfig = {
-//   anomalies: {
-//     label: 'Anomalies',
-//     color: 'hsl(var(--primary))',
-//   },
-//   frequency: {
-//     label: 'Frequency',
-//     color: 'hsl(var(--accent))',
-//   },
-// };
+const chartConfig = {
+  sybil: {
+    label: 'Sybil Attacks',
+    color: 'hsl(var(--primary))',
+  },
+  sensor: {
+    label: 'Sensor Spoofing',
+    color: 'hsl(var(--accent))',
+  },
+};
 
-// export function GpsAnomaliesChart() {
-//   return (
-//     <Card>
-//       <CardHeader>
-//         <CardTitle className="text-xl font-semibold">GPS Signal Anomalies Over Time</CardTitle>
-//         <CardDescription>Last 6 hours</CardDescription>
-//       </CardHeader>
-//       <CardContent>
-//         <ChartContainer config={chartConfig} className="h-[250px] w-full">
-//           <ResponsiveContainer width="100%" height="100%">
-//             <LineChart data={gpsAnomaliesData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
-//               <CartesianGrid strokeDasharray="3 3" vertical={false} />
-//               <XAxis dataKey="time" />
-//               <YAxis />
-//               <ChartTooltip content={<ChartTooltipContent />} />
-//               <Line type="monotone" dataKey="anomalies" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} />
-//             </LineChart>
-//           </ResponsiveContainer>
-//         </ChartContainer>
-//       </CardContent>
-//     </Card>
-//   );
-// }
-
-// export function SpoofingFrequencyChart() {
-//   return (
-//     <Card>
-//       <CardHeader>
-//         <CardTitle className="text-xl font-semibold">Spoofing Frequency by Module</CardTitle>
-//         <CardDescription>Breakdown of spoofing events by vehicle module.</CardDescription>
-//       </CardHeader>
-//       <CardContent>
-//         <ChartContainer config={chartConfig} className="h-[250px] w-full">
-//           <ResponsiveContainer width="100%" height="100%">
-//             <BarChart data={spoofingFrequencyData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
-//               <CartesianGrid strokeDasharray="3 3" vertical={false} />
-//               <XAxis dataKey="module" tickLine={false} axisLine={false} />
-//               <YAxis />
-//               <ChartTooltip cursor={false} content={<ChartTooltipContent indicator="dot" />} />
-//               <Bar dataKey="frequency" fill="hsl(var(--primary))" radius={4} />
-//             </BarChart>
-//           </ResponsiveContainer>
-//         </ChartContainer>
-//       </CardContent>
-//     </Card>
-//   );
-// }
+export function ThreatTrendChart({ data }: ThreatTrendChartProps) {
+  return (
+    <Card className="col-span-full">
+      <CardHeader>
+        <CardTitle className="text-xl font-semibold">Security Threat Trends</CardTitle>
+        <CardDescription>Consolidated volume of malicious activities over the last 7 days.</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <ChartContainer config={chartConfig} className="h-[300px] w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} />
+              <XAxis 
+                dataKey="date" 
+                tickLine={false} 
+                axisLine={false} 
+                tickMargin={10}
+              />
+              <YAxis 
+                tickLine={false} 
+                axisLine={false} 
+                tickMargin={10}
+              />
+              <ChartTooltip content={<ChartTooltipContent />} />
+              <ChartLegend content={<ChartLegendContent />} />
+              <Line 
+                type="monotone" 
+                dataKey="sybil" 
+                stroke="hsl(var(--primary))" 
+                strokeWidth={3} 
+                dot={{ r: 4, fill: 'hsl(var(--primary))' }}
+                activeDot={{ r: 6 }}
+              />
+              <Line 
+                type="monotone" 
+                dataKey="sensor" 
+                stroke="hsl(var(--accent))" 
+                strokeWidth={3} 
+                dot={{ r: 4, fill: 'hsl(var(--accent))' }}
+                activeDot={{ r: 6 }}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </ChartContainer>
+      </CardContent>
+    </Card>
+  );
+}
