@@ -23,14 +23,6 @@ import {
   AskThreatAdvisorInputSchema,
 } from '@/ai/schemas/threat-advisor-schemas';
 import { z } from 'zod';
-// import {
-//   detectGpsSpoofing,
-// } from '@/ai/flows/detect-gps-spoofing';
-// import {
-//   type DetectGpsSpoofingInput,
-//   type DetectGpsSpoofingOutput,
-//   DetectGpsSpoofingInputSchema,
-// } from '@/ai/schemas/detect-gps-spoofing-schemas';
 import {
   detectSensorAnomaly,
 } from '@/ai/flows/detect-sensor-anomaly';
@@ -77,25 +69,6 @@ export async function getSybilAttackPrediction(
     return { error: 'Failed to get prediction.' };
   }
 }
-
-// export async function getGpsSpoofingPrediction(
-//   input: DetectGpsSpoofingInput
-// ): Promise<{ result?: DetectGpsSpoofingOutput; error?: string }> {
-//   const parsed = DetectGpsSpoofingInputSchema.safeParse(input);
-
-  // if (!parsed.success) {
-  //   console.error(parsed.error);
-  //   return { error: 'Invalid input.' };
-  // }
-
-  // try {
-  //   const result = await detectGpsSpoofing(parsed.data);
-  //   return { result };
-  // } catch (e) {
-  //   console.error(e);
-  //   return { error: 'Failed to get prediction.' };
-  // }
-// }
 
 export async function getSensorAnomalyPrediction(
   input: DetectSensorAnomalyInput

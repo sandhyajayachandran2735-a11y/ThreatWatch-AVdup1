@@ -20,14 +20,14 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
-import { AlertCircle, CheckCircle, Loader2, UploadCloud, ShieldCheck, ShieldAlert, ListChecks } from 'lucide-react';
+import { AlertCircle, Loader2, UploadCloud, ShieldCheck, ShieldAlert, ListChecks } from 'lucide-react';
 import { Gauge } from '@/components/gauge';
 import { useToast } from '@/hooks/use-toast';
 import SpoofingCard from "../sybil-detection/spoofing";
 import { useMaliciousCount } from '../context/malicious-count-context';
 import { useAnalysis } from '../context/analysis-context';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { getSybilAttackPrediction } from '@/app/actions';
 
 const DetectSybilAttackInputSchema = z.object({
   x: z.number(),
@@ -58,7 +58,7 @@ const sampleData = {
 export default function SybilDetectionPage() {
   const { toast } = useToast();
   const db = useFirestore();
-  const { maliciousCount, setMaliciousCount } = useMaliciousCount();
+  const { setMaliciousCount } = useMaliciousCount();
   const { activeFile, activeType, clearAnalysis } = useAnalysis();
 
   const [isLoading, setIsLoading] = useState(false);
@@ -104,36 +104,58 @@ export default function SybilDetectionPage() {
       });
   };
 
-  const handlePredictionResult = (result: SybilPredictionResult, source: 'Manual' | 'CSV', inputs: any) => {
+  const handlePredictionResult = async (result: SybilPredictionResult, source: 'Manual' | 'CSV', inputs: any) => {
     const isMalicious = result.prediction === 1;
     const confidence = result.confidence ?? 0.5;
     
-    const reasoning = result.reasoning || (isMalicious
-        ? `Potential Sybil Attack Detected: This vehicle is broadcasting data that matches patterns of identity spoofing. In a Sybil attack, one malicious vehicle creates multiple fake personas to manipulate traffic reports or disrupt the communication network. Our AI model has flagged this behavior with ${Math.round(confidence * 100)}% certainty, suggesting this node should be isolated to prevent network disruption.`
-        : `Safe Operation Confirmed: The vehicle's communication patterns, including its speed, position, and acceleration, are consistent with normal physical movement and network protocols. No signs of identity manipulation or "ghost vehicles" were detected. The node is behaving as a single, legitimate entity within the Vehicular Network.`);
+    // Call AI Advisor for dynamic reasoning and mitigation
+    try {
+      const aiResponse = await getSybilAttackPrediction({
+        position_x: inputs.x || 0,
+        position_y: inputs.y || 0,
+        speed: inputs.speed || 0,
+        direction: 0,
+        acceleration: inputs.acceleration || 0,
+        signal_strength: 0,
+        trust_score: isMalicious ? 0.1 : 0.9,
+        sybil_attack_attempts: isMalicious ? 5 : 0,
+      });
 
-    const mitigationSteps = result.mitigationSteps || (isMalicious 
-      ? ["Isolate the detected vehicle ID from the network", "Initiate identity re-verification for all nodes in the sector", "Update local VANET trust certificates"]
-      : ["Perform routine communication integrity check", "Log benign activity for behavior baseline", "Ensure firmware is updated to the latest security patch"]);
+      const reasoning = aiResponse.result?.reasoning || (isMalicious
+        ? `Potential Sybil Attack Detected: This vehicle is broadcasting data patterns characteristic of identity spoofing. Our AI identifies that this node may be creating phantom personas to disrupt navigation protocols.`
+        : `Safe Operation Confirmed: The vehicle's communication profile is consistent with legitimate physical movement and standard network behavior.`);
 
-    setPrediction({
-      isMalicious,
-      confidence: confidence,
-      reasoning,
-      mitigationSteps,
-    });
+      const mitigationSteps = aiResponse.result?.mitigationSteps || (isMalicious 
+        ? ["Isolate the detected vehicle ID from the network", "Initiate identity re-verification for all nodes in the sector", "Update local VANET trust certificates"]
+        : ["Perform routine communication integrity check", "Log benign activity for behavior baseline", "Ensure firmware is updated to the latest security patch"]);
 
-    if (isMalicious) {
-      setMaliciousCount(prevCount => prevCount + 1);
+      setPrediction({
+        isMalicious,
+        confidence: confidence,
+        reasoning,
+        mitigationSteps,
+      });
+
+      if (isMalicious) {
+        setMaliciousCount(prevCount => prevCount + 1);
+      }
+
+      saveToHistory(isMalicious, confidence, reasoning, mitigationSteps, source, inputs);
+
+      toast({
+        title: 'Analysis complete',
+        description: isMalicious ? 'Malicious activity detected!' : 'Behavior appears benign.',
+        variant: isMalicious ? 'destructive' : 'default',
+      });
+    } catch (e) {
+      console.error("AI Advisor failed", e);
+       setPrediction({
+        isMalicious,
+        confidence: confidence,
+        reasoning: "Analysis report failed to generate. Please check network logs manually.",
+        mitigationSteps: isMalicious ? ["Flag for immediate review", "Isolate node"] : ["Monitor node activity"],
+      });
     }
-
-    saveToHistory(isMalicious, confidence, reasoning, mitigationSteps, source, inputs);
-
-    toast({
-      title: 'Analysis complete',
-      description: isMalicious ? 'Malicious activity detected!' : 'Behavior appears benign.',
-      variant: isMalicious ? 'destructive' : 'default',
-    });
   };
 
   const handleRunDetection = async (data: DetectSybilAttackInput) => {
@@ -153,7 +175,7 @@ export default function SybilDetectionPage() {
       }
       
       const result: SybilPredictionResult = await response.json();
-      handlePredictionResult(result, 'Manual', data);
+      await handlePredictionResult(result, 'Manual', data);
 
     } catch (e: any) {
       setError(e.message);
@@ -185,7 +207,7 @@ export default function SybilDetectionPage() {
       }
 
       const result: SybilPredictionResult = await response.json();
-      handlePredictionResult(result, 'CSV', { filename: fileToUse.name });
+      await handlePredictionResult(result, 'CSV', { filename: fileToUse.name });
     } catch (e: any) {
       setError(e.message);
       toast({
@@ -326,7 +348,7 @@ export default function SybilDetectionPage() {
                   </TabsContent>
                   <TabsContent value="mitigation" className="text-left mt-4">
                     <div className="bg-muted p-4 rounded-md space-y-3 border-l-4 border-primary">
-                        <h4 className="text-sm font-bold flex items-center gap-2">
+                        <h4 className="text-sm font-bold flex items-center gap-2 text-foreground">
                             <ListChecks className="h-4 w-4" />
                             Recommended Actions
                         </h4>

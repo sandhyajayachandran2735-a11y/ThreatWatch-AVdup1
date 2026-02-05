@@ -18,14 +18,14 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
-import { AlertCircle, CheckCircle, Loader2, ShieldQuestion, UploadCloud, ShieldCheck, ListChecks } from 'lucide-react';
+import { AlertCircle, Loader2, ShieldQuestion, UploadCloud, ShieldCheck, ListChecks } from 'lucide-react';
 import { Gauge } from '@/components/gauge';
 import { useToast } from '@/hooks/use-toast';
 import * as z from 'zod';
 import { useAnalysis } from '../context/analysis-context';
 import { useMaliciousCount } from '../context/malicious-count-context';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { getSensorAnomalyPrediction } from '@/app/actions';
 
 const SensorSpoofingInputSchema = z.object({
   speed_kmh: z.number(),
@@ -44,7 +44,6 @@ const defaultValues: SensorSpoofingInput = {
     obstacle_distance: 4.26,
     traffic_density: 41,
 };
-
 
 export default function SensorSpoofingPage() {
   const db = useFirestore();
@@ -97,39 +96,56 @@ export default function SensorSpoofingPage() {
       });
   };
 
-  const handlePredictionResult = (result: any, source: 'Manual' | 'CSV', inputs: any) => {
-    if (result.action) {
-        const confidence = result.confidence ?? 0.5;
-        const isMalicious = result.action !== 'Normal Driving';
-        
-        const reasoning = result.reasoning || (isMalicious
-            ? `Critical Sensor Anomaly Detected: Our system has identified significant inconsistencies in the vehicle's sensor data, which often indicates external "spoofing." This occurs when false signals are sent to the vehicle's LIDAR or Radar to trick it into seeing obstacles that aren't there, or missing real ones. To ensure safety, the model recommends an immediate '${result.action}' protocol. We are ${Math.round(confidence * 100)}% confident that this behavior deviates from safe, normal operation.`
-            : `Safe Navigation Confirmed: All sensor inputs—including speed, lane alignment, and obstacle detection—are perfectly synchronized and consistent with a normal driving environment. The vehicle's perception of the road matches physical reality, and no signs of signal manipulation or sensor errors were found. It is safe to proceed with 'Normal Driving' protocols.`);
+  const handlePredictionResult = async (result: any, source: 'Manual' | 'CSV', inputs: any) => {
+    const isMalicious = result.action !== 'Normal Driving';
+    const confidence = result.confidence ?? 0.5;
 
-        const mitigationSteps = result.mitigationSteps || (isMalicious
-            ? ["Switch perception system to secondary redundant sensor array", "Initiate emergency braking or pull-over maneuver", "Flag sensor ID for physical inspection and re-calibration"]
-            : ["Proceed with mission using primary sensor data", "Perform routine background calibration check", "Log sensor health metrics for historical baseline"]);
+    // Call Genkit Advisor for detailed reasoning and mitigation
+    try {
+      const aiResponse = await getSensorAnomalyPrediction({
+        sensor_type: "CAMERA", // Defaulting as example
+        reading: inputs.speed_kmh || 0,
+        redundancy_check_ok: isMalicious ? 0 : 1,
+        time_since_last_reading_ms: 10,
+        expected_range_min: 0,
+        expected_range_max: 120,
+      });
 
-        setPrediction({
-            action: result.action,
-            confidence: confidence,
-            reasoning: reasoning,
-            mitigationSteps,
-        });
+      const reasoning = aiResponse.result?.reasoning || (isMalicious
+        ? `Critical Sensor Anomaly Detected: Our system identified inconsistencies in the sensor data stream. This pattern often suggests external "spoofing" where false signals are sent to the vehicle's perception array to trick it into incorrect lane placement or obstacle detection.`
+        : `Safe Navigation Confirmed: All sensor inputs including speed, lane alignment, and obstacle distance are consistent with a normal driving environment. The vehicle's perception matches the physical reality of its surroundings.`);
 
-        if (isMalicious) {
-            setMaliciousCount(prev => prev + 1);
-        }
+      const mitigationSteps = aiResponse.result?.mitigationSteps || (isMalicious
+        ? ["Switch perception system to secondary redundant sensor array", "Initiate emergency braking or pull-over maneuver", "Flag sensor ID for physical inspection and re-calibration"]
+        : ["Proceed with mission using primary sensor data", "Perform routine background calibration check", "Log sensor health metrics for historical baseline"]);
 
-        saveToHistory(result.action, confidence, reasoning, mitigationSteps, source, inputs);
+      setPrediction({
+        action: result.action,
+        confidence: confidence,
+        reasoning: reasoning,
+        mitigationSteps,
+      });
 
-        toast({
-            title: 'Analysis Complete',
-            description: `Action: ${result.action}`,
-            variant: isMalicious ? 'destructive' : 'default',
-        });
-    } else {
-        throw new Error("Invalid response from backend.");
+      if (isMalicious) {
+        setMaliciousCount(prev => prev + 1);
+      }
+
+      saveToHistory(result.action, confidence, reasoning, mitigationSteps, source, inputs);
+
+      toast({
+        title: 'Analysis Complete',
+        description: `Action: ${result.action}`,
+        variant: isMalicious ? 'destructive' : 'default',
+      });
+    } catch (e) {
+      console.error("AI Advisor failed", e);
+      // Fallback with static steps
+       setPrediction({
+        action: result.action,
+        confidence: confidence,
+        reasoning: "Detailed analysis currently unavailable. Manual inspection recommended.",
+        mitigationSteps: isMalicious ? ["Manual inspection required", "Switch to redundant systems"] : ["Proceed with caution"],
+      });
     }
   };
 
@@ -142,7 +158,7 @@ export default function SensorSpoofingPage() {
       const response = await fetch(url, {
         method: 'POST',
         body: body,
-          mode: 'cors',
+        mode: 'cors',
         headers: body instanceof FormData ? undefined : { 'Content-Type': 'application/json' },
       });
 
@@ -152,7 +168,7 @@ export default function SensorSpoofingPage() {
       }
       
       const result = await response.json();
-      handlePredictionResult(result, source, inputs);
+      await handlePredictionResult(result, source, inputs);
 
     } catch (e: any) {
       setError(e.message);
@@ -177,7 +193,6 @@ export default function SensorSpoofingPage() {
     runPrediction('https://sybil-backend.onrender.com/predict-sensor-csv', formData, 'CSV', { filename: fileToAnalyze.name });
   }, []);
 
-  // Effect to run analysis from context
   useEffect(() => {
     if (activeFile && activeType === 'sensor') {
       handleCsvUpload(activeFile);
@@ -298,7 +313,7 @@ export default function SensorSpoofingPage() {
               </TabsContent>
               <TabsContent value="mitigation" className="text-left mt-4">
                 <div className="bg-muted p-4 rounded-md space-y-3 border-l-4 border-primary">
-                    <h4 className="text-sm font-bold flex items-center gap-2">
+                    <h4 className="text-sm font-bold flex items-center gap-2 text-foreground">
                         <ListChecks className="h-4 w-4" />
                         Recommended Actions
                     </h4>
