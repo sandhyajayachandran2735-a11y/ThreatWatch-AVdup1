@@ -1,22 +1,6 @@
 /**
  * @file firestore.rules
  * @description Security rules for the Autonomous Vehicle Threat Detection System.
- *
- * Core Philosophy:
- * This ruleset enforces a strict server-centric security model. All data mutations
- * (creates, updates, deletes) are expected to originate from a trusted backend
- * environment (e.g., Cloud Functions, a server with the Admin SDK) which bypasses
- * these client-facing rules. Client-side applications are effectively granted
- * read-only access to prevent unauthorized data manipulation.
- *
- * Data Structure:
- * The data is organized into a flat structure with several top-level collections:
- * `/vehicleCommunicationLogs`, `/sybilDetectionResults`, `/sybil_attacks`, and `/detection_logs`.
- *
- * Key Security Decisions:
- * 1. Backend-Only Writes: For communication logs, only backend services should write.
- * 2. Authenticated Access: For detection results and logs, authenticated users can read and create entries.
- * 3. Public Read Access: Some raw logs may be public, but detection results require auth.
  */
 rules_version = '2';
 service cloud.firestore {
@@ -44,11 +28,18 @@ service cloud.firestore {
     }
 
     /**
-     * @description
-     * Stores Sybil attack logs used by the History page.
      * @path /sybil_attacks/{attackId}
      */
     match /sybil_attacks/{attackId} {
+      allow get, list: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update, delete: if false;
+    }
+
+    /**
+     * @path /threat_events/{eventId}
+     */
+    match /threat_events/{eventId} {
       allow get, list: if isSignedIn();
       allow create: if isSignedIn();
       allow update, delete: if false;
