@@ -108,7 +108,6 @@ export default function SybilDetectionPage() {
     const isMalicious = result.prediction === 1;
     const confidence = result.confidence ?? 0.5;
     
-    // Call AI Advisor for dynamic reasoning and mitigation
     try {
       const aiResponse = await getSybilAttackPrediction({
         position_x: inputs.x || 0,
@@ -364,7 +363,7 @@ export default function SybilDetectionPage() {
             ) : (
               <div className="text-center flex flex-col items-center gap-3 text-muted-foreground">
                 <ShieldCheck className="h-12 w-12 opacity-20" />
-                <p>Submit data to get an AI-powered prediction and advisor report.</p>
+                <p>Submit data to get a backend-model prediction and AI-advisor report.</p>
               </div>
             )}
           </CardContent>

@@ -100,10 +100,9 @@ export default function SensorSpoofingPage() {
     const isMalicious = result.action !== 'Normal Driving';
     const confidence = result.confidence ?? 0.5;
 
-    // Call Genkit Advisor for detailed reasoning and mitigation
     try {
       const aiResponse = await getSensorAnomalyPrediction({
-        sensor_type: "CAMERA", // Defaulting as example
+        sensor_type: "CAMERA",
         reading: inputs.speed_kmh || 0,
         redundancy_check_ok: isMalicious ? 0 : 1,
         time_since_last_reading_ms: 10,
@@ -139,7 +138,6 @@ export default function SensorSpoofingPage() {
       });
     } catch (e) {
       console.error("AI Advisor failed", e);
-      // Fallback with static steps
        setPrediction({
         action: result.action,
         confidence: confidence,
@@ -329,7 +327,7 @@ export default function SensorSpoofingPage() {
         ) : (
            <div className="text-center text-muted-foreground flex flex-col items-center gap-3">
                 <ShieldQuestion className="h-12 w-12 opacity-20" />
-                <p>Submit data to get an AI-powered prediction and advisor report.</p>
+                <p>Submit data to get a backend-model prediction and AI-advisor report.</p>
             </div>
         )}
         </CardContent>
