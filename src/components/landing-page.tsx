@@ -107,6 +107,24 @@ export function LandingPage() {
                   </p>
                 </CardContent>
               </Card>
+              <Card className="text-center">
+                <CardHeader className="items-center">
+                  <div className="rounded-full bg-primary/10 p-4 text-primary">
+                    <Radar className="h-8 w-8" />
+                  </div>
+                  <CardTitle className="mt-4">
+                    Sensor Spoofing Detection
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <p className="text-sm text-muted-foreground">
+                    Sensor spoofing attacks manipulate data from a vehicle's sensors like LiDAR, radar, or cameras. This can cause the vehicle to misinterpret its environment, leading to dangerous actions like sudden braking or incorrect lane changes.
+                  </p>
+                  <p className="text-sm font-medium">
+                    ThreatWatch AV uses AI to cross-validate sensor data against expected patterns and redundant inputs. It detects anomalies in real-time to prevent the vehicle from acting on malicious information.
+                  </p>
+                </CardContent>
+              </Card>
               <Card className="text-center bg-muted/50">
                 <CardHeader className="items-center">
                   <div className="rounded-full bg-muted p-4 text-muted-foreground">
@@ -120,7 +138,7 @@ export function LandingPage() {
                   </p>
                 </CardContent>
               </Card>
-              <Card className="text-center">
+              {/* <Card className="text-center">
                 <CardHeader className="items-center">
                   <div className="rounded-full bg-primary/10 p-4 text-primary">
                     <Radar className="h-8 w-8" />
@@ -137,7 +155,7 @@ export function LandingPage() {
                       ThreatWatch AV uses machine learning to analyze sensor data for anomalies, comparing readings against expected values to detect spoofing attempts and safeguard the vehicle.
                     </p>
                 </CardContent>
-              </Card>
+              </Card> */}
             </div>
           </div>
         </section>

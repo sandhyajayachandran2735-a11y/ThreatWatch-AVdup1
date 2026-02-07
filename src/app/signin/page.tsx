@@ -22,7 +22,6 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Logo } from '@/components/icons';
 import { useAuth } from '@/firebase';
 import { signInWithEmailAndPassword } from 'firebase/auth';
@@ -56,11 +55,18 @@ export default function SignInPage() {
       });
       router.push('/dashboard');
     } catch (error: any) {
-      console.error('Sign in error:', error);
+      let errorMessage = 'An unexpected error occurred. Please try again.';
+      
+      if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+        errorMessage = 'Invalid email or password. Please check your credentials and try again.';
+      } else if (error.code === 'auth/too-many-requests') {
+        errorMessage = 'Too many failed login attempts. Please try again later.';
+      }
+
       toast({
         variant: 'destructive',
         title: 'Sign In Failed',
-        description: error.message || 'An unexpected error occurred.',
+        description: errorMessage,
       });
     }
   };
@@ -120,11 +126,6 @@ export default function SignInPage() {
             Don&apos;t have an account?{' '}
             <Link href="/signup" className="underline">
               Sign up
-            </Link>
-          </div>
-           <div className="mt-4 text-center text-sm">
-             <Link href="/signup" className="underline">
-              Use another account
             </Link>
           </div>
         </CardContent>
