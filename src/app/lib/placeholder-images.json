@@ -1,0 +1,22 @@
+{
+  "placeholderImages": [
+    {
+      "id": "mission-map-thumbnail",
+      "description": "A small map thumbnail for a mission card",
+      "imageUrl": "https://images.unsplash.com/photo-1718498576054-412e92061bbe?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxtYXAlMjB0ZXJyYWlufGVufDB8fHx8MTc2NTQxNDg5OHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "map terrain"
+    },
+    {
+      "id": "dashboard-map",
+      "description": "A large map for the main dashboard view",
+      "imageUrl": "https://images.unsplash.com/photo-1581922819941-6ab31ab79afc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxjaXR5JTIwbWFwfGVufDB8fHx8MTc2NTMxMzMzN3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "city map"
+    },
+    {
+      "id": "landing-hero",
+      "description": "A hero image for the landing page showing a tactical map of vehicle operations.",
+      "imageUrl": "https://journeyz.co/wp-content/uploads/2022/03/map-scaled.jpg",
+      "imageHint": "tactical map"
+    }
+  ]
+}
