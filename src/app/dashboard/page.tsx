@@ -7,11 +7,10 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { AlertTriangle, ShieldCheck, ShieldAlert, Loader2, Map as MapIcon } from 'lucide-react';
+import { AlertTriangle, ShieldCheck, ShieldAlert, Loader2 } from 'lucide-react';
 import { AIThreatSummary } from './_components/ai-summary';
 import { FloatingChatbot } from './_components/floating-chatbot';
 import { ThreatTrendChart } from './_components/charts';
-import { LiveMap } from './_components/live-map';
 import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, query, orderBy } from 'firebase/firestore';
 import { format, subDays, startOfDay, isSameDay } from 'date-fns';
@@ -138,19 +137,8 @@ export default function DashboardPage() {
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2">
-          <ThreatTrendChart data={stats.trendData} />
-        </div>
-        <Card className="flex flex-col">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-xl font-semibold">Live GPS Map</CardTitle>
-            <MapIcon className="h-5 w-5 text-muted-foreground" />
-          </CardHeader>
-          <CardContent className="flex-1 min-h-[300px] p-0 overflow-hidden relative">
-            <LiveMap />
-          </CardContent>
-        </Card>
+      <div className="w-full">
+        <ThreatTrendChart data={stats.trendData} />
       </div>
 
       <AIThreatSummary
