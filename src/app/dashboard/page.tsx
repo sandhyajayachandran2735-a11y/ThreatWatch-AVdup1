@@ -110,15 +110,7 @@ export default function DashboardPage() {
             )}
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">GPS Spoofing Events</CardTitle>
-            <AlertTriangle className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <p className="text-xs text-muted-foreground">Releasing soon...</p>
-          </CardContent>
-        </Card>
+        
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Sensor Spoofing Flags</CardTitle>
@@ -133,6 +125,16 @@ export default function DashboardPage() {
             ) : (
               <div className="text-2xl font-bold text-foreground">{stats.sensorMalicious}</div>
             )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">GPS Spoofing Events</CardTitle>
+            <AlertTriangle className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <p className="text-xs text-muted-foreground">Releasing soon...</p>
           </CardContent>
         </Card>
       </div>

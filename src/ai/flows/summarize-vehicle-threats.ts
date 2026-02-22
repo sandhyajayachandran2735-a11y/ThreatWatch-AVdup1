@@ -23,19 +23,30 @@ const prompt = ai.definePrompt({
   name: 'summarizeVehicleThreatsPrompt',
   input: { schema: SummarizeVehicleThreatsInputSchema },
   output: { schema: SummarizeVehicleThreatsOutputSchema },
-  prompt: `You are a security analyst specializing in autonomous vehicle threat detection.
+  prompt: `You are an AI Risk Assessment engine for an Autonomous Vehicle threat detection system.
 
-  Based on the following threat intelligence signals from the fleet today, provide a prioritized summary of the most critical threats to vehicle safety. Highlight the most pressing issues that require immediate attention.
+Analyze the provided dashboard data and generate a prioritized summary.
 
-  - Sybil Alerts Today: {{sybilAlertsToday}}
-  - Sensor Spoofing Alerts Today: {{sensorAlertsToday}}
+RULES:
+- Plain text only.
+- No markdown (no bold, no italics, no lists).
+- Maximum 120 words.
+- If sybilAlertsToday and sensorAlertsToday are both 0, you MUST say exactly: "System stable. No active threats detected."
 
-  Analyze the risk based on these numbers. If both are high, warn of a coordinated multi-vector attack. If only one is active, explain the specific risk of that attack type (Sybil for network/identity disruption, Sensor for perception manipulation).
+OUTPUT FORMAT:
+Highest Priority Threat: <Name>
+Risk Level: <Low/Medium/High>
+Impact: <Short explanation>
+Recommended Actions: <2-3 mitigation steps>
 
-  {{#if additionalContext}}
-  Additional Context: {{additionalContext}}
-  {{/if}}
-  `,
+DATA:
+- Sybil Alerts Today: {{sybilAlertsToday}}
+- Sensor Spoofing Alerts Today: {{sensorAlertsToday}}
+{{#if additionalContext}}
+- Context: {{additionalContext}}
+{{/if}}
+
+Focus only on the most critical detected attack.`,
 });
 
 const summarizeVehicleThreatsFlow = ai.defineFlow(

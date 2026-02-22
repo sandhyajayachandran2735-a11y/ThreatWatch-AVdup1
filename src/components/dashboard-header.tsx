@@ -1,4 +1,5 @@
 'use client';
+import { useState, useEffect } from 'react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,7 +10,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Loader2, User } from 'lucide-react';
+import { User } from 'lucide-react';
 import Link from 'next/link';
 import { SidebarTrigger } from './ui/sidebar';
 import { useAuth, useUser } from '@/firebase';
@@ -21,6 +22,11 @@ export function DashboardHeader() {
   const { user, isUserLoading } = useUser();
   const auth = useAuth();
   const router = useRouter();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleLogout = async () => {
     await signOut(auth);
@@ -35,6 +41,17 @@ export function DashboardHeader() {
     }
     return names[0][0];
   };
+
+  if (!mounted) {
+    return (
+      <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-background px-4 sm:px-6">
+        <div className="flex items-center gap-4">
+          <Skeleton className="h-6 w-32" />
+        </div>
+        <Skeleton className="h-9 w-9 rounded-full" />
+      </header>
+    );
+  }
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-background px-4 sm:px-6">

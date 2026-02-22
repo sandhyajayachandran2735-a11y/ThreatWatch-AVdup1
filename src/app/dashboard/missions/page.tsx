@@ -48,12 +48,12 @@ interface Mission {
 }
 
 const initialSybilMissions: Mission[] = [
-  { id: 1, title: 'Los Angeles', files: [{ name: 'comm_log_la_01.csv', data: null }] },
-  { id: 2, title: 'San Francisco', files: [{ name: 'sf_traffic_data.csv', data: null }] },
+  { id: 1, title: 'Bangalore', files: [{ name: 'comm_log_la_01.csv', data: null }] },
+  { id: 2, title: 'Pune', files: [{ name: 'sf_traffic_data.csv', data: null }] },
 ];
 
 const initialSensorMissions: Mission[] = [
-  { id: 101, title: 'New York Central', files: [{ name: 'sensor_ny_stream.csv', data: null }] },
+  { id: 101, title: 'Mumbai', files: [{ name: 'sensor_ny_stream.csv', data: null }] },
   // {
   //   id: 102,title: 'Urban Canyon Test',files: [{ name: 'sensor1_ny_stream.csv', data: null }]
   // },
