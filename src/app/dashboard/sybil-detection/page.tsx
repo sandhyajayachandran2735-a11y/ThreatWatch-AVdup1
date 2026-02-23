@@ -31,8 +31,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { getSybilAttackPrediction } from '@/app/actions';
 
 const DetectSybilAttackInputSchema = z.object({
-  x: z.number(),
-  y: z.number(),
+  x : z.number(),
+  y : z.number(),
   speed: z.number(),
   acceleration: z.number(),
 });
